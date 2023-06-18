@@ -5,3 +5,5 @@
 *.img
 *.pcap
 *.pyc
+
+book/

@@ -1,4 +1,7 @@
-# 実行結果
+# QEMU/RISC-Vの実行メモ
+
+- macで実行
+- 必要なパッケージはすべてインストール済みだった
 
 ```
 $ make
@@ -406,4 +409,3 @@ shell> http http://192.168.10.103/index.html
 [tcpip] tcp: TX: lport=49153, seq=00000000, ack=00000000, len=0 [ SYN ]
 QEMU: Terminated
 ```
-

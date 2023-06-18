@@ -1,0 +1,14 @@
+[book]
+authors = ["Keiji Suzuki"]
+language = "ja"
+multilingual = false
+src = "docs"
+title = "HinaOSドキュメント"
+
+[output.html]
+default-theme = "rust"
+git-repository-url = "https://github.com/zuki/hinaos"
+
+[output.html.fold]
+enable = false
+level = 0
