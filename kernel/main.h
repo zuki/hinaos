@@ -1,3 +1,4 @@
+/** @file main.h */
 #pragma once
 #include "arch.h"
 

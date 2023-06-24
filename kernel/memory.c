@@ -1,3 +1,6 @@
+/**
+ * @file memory.c
+ */
 #include "memory.h"
 #include "arch.h"
 #include "ipc.h"
@@ -5,7 +8,11 @@
 #include "task.h"
 #include <libs/common/string.h>
 
-// 物理メモリの各連続領域 (ゾーン) のリスト。
+/**
+ * @ingroup kernel
+ * @var zones
+ * @brief 物理メモリの各連続領域 (ゾーン) のリスト
+ */
 static list_t zones = LIST_INIT(zones);
 
 // 物理アドレスに対応するゾーンを探す。
@@ -53,13 +60,16 @@ static bool is_contiguously_free(struct memory_zone *zone, size_t start,
     return true;
 }
 
-// sizeバイトの連続した物理メモリ領域を物理ページ単位で割り当てる。ownerはその領域の
-// 所有者となるタスク。NULLを指定するとカーネルが所有者となる。
-//
-// flagsには次のフラグを指定できる。
-//
-// - PM_ALLOC_ZEROED: 物理ページをゼロクリアする
-// - PM_ALLOC_ALIGNED: sizeでアラインされた物理メモリアドレスを返す
+/**
+ * @ingroup kernel
+ * @brief 指定されたバイトの連続した物理メモリ領域を物理ページ単位で割り当てる.
+ * @param size 割り当てるバイト数
+ * @param owner 割り当てた領域の所有者のクラス. NULLの場合はカーネル。
+ * @param flags フラグ.
+ *  - PM_ALLOC_ZEROED: 物理ページをゼロクリアする
+ *  - PM_ALLOC_ALIGNED: sizeでアラインされた物理メモリアドレスを返す
+ * @return 割り当てた物理メモリの先頭アドレス. 割り当てるメモリがない場合は0。
+ */
 paddr_t pm_alloc(size_t size, struct task *owner, unsigned flags) {
     size_t aligned_size = ALIGN_UP(size, PAGE_SIZE);  // 実際に割り当てるサイズ
     size_t num_pages = aligned_size / PAGE_SIZE;      // 割り当てる物理ページ数
@@ -118,9 +128,14 @@ static void free_page(struct page *page) {
     }
 }
 
-// 物理ページの所有者を設定する。所有者タスクが終了するときに、指定した物理ページの参照カウント
-// が減算されるようになる。タスクに対して物理ページを割り当てたいが、まだそのタスクの初期化が
-// 終わっていない場合に使う。
+/** @ingroup kernel
+ * @brief 物理ページの所有者を設定する. 所有者タスクが終了するときに、
+ * 指定した物理ページの参照カウントが減算されるようになる。タスクに
+ * 対して物理ページを割り当てたいが、まだそのタスクの初期化が終わって
+ * いない場合に使う。
+ * @param paddr 所有者を設定する物理ページのアドレス
+ * @param owner 所有者（タスク）
+ */
 void pm_own_page(paddr_t paddr, struct task *owner) {
     struct page *page = find_page_by_paddr(paddr, NULL);
 
@@ -133,7 +148,11 @@ void pm_own_page(paddr_t paddr, struct task *owner) {
     list_push_back(&owner->pages, &page->next);
 }
 
-// pm_alloc関数で割り当てた、連続した物理メモリ領域を解放する。
+/** @ingroup kernel
+ * @brief pm_alloc関数で割り当てた、連続した物理メモリ領域を解放する.
+ * @param paddr 解放する物理メモリ領域のアドレス
+ * @param size 解放する物理メモリ領域のサイズ
+ */
 void pm_free(paddr_t paddr, size_t size) {
     DEBUG_ASSERT(IS_ALIGNED(size, PAGE_SIZE));
 
@@ -146,14 +165,19 @@ void pm_free(paddr_t paddr, size_t size) {
     }
 }
 
-// pm_free関数の引数にリストを指定するバージョン。
+/** @ingroup kernel
+ * @brief pm_free関数の引数にリストを指定するバージョン.
+ * @param pages 解放する物理ページのリスト
+ */
 void pm_free_by_list(list_t *pages) {
     LIST_FOR_EACH (page, pages, struct page, next) {
         free_page(page);
     }
 }
 
-// ページを指定した物理アドレスにマップ (ページテーブルへの追加) する。
+/** @ingroup kernel
+ * @brief ページを指定した仮想アドレスにマップ (ページテーブルへの追加) する.
+ */
 error_t vm_map(struct task *task, uaddr_t uaddr, paddr_t paddr,
                unsigned attrs) {
     // 物理アドレスからページ管理構造体を取得する。
@@ -263,7 +287,10 @@ void handle_page_fault(vaddr_t vaddr, vaddr_t ip, unsigned fault) {
     }
 }
 
-// メモリ管理システムの初期化
+/** @group kernel
+ * @brief メモリ管理システムの初期化.
+ * @param bootinfo bootinfoへのポインタ
+ */
 void memory_init(struct bootinfo *bootinfo) {
     struct memory_map *memory_map = &bootinfo->memory_map;
     for (int i = 0; i < memory_map->num_frees; i++) {

@@ -1,3 +1,4 @@
+/** @file syscall.c */
 #include "syscall.h"
 #include "arch.h"
 #include "hinavm.h"
@@ -8,8 +9,16 @@
 #include "task.h"
 #include <libs/common/string.h>
 
-// ユーザー空間からのメモリコピー。通常のmemcpyと異なり、コピー中にページフォルトが発生した場合
-// には、カーネルランドではなくユーザータスクで発生したページフォルトとして処理する。
+/** @ingroup kernel
+ * @brief ユーザー空間からのメモリコピー.
+ * 通常のmemcpyと異なり、コピー中にページフォルトが発生した場合には、
+ * カーネルランドではなくユーザータスクで発生したページフォルトと
+ * して処理する。
+ * @param dst コピー先アドレス
+ * @param src コピー元アドレス
+ * @param len コピーサイズ
+ * @return 成功したらOK, エラーの場合はエラーコード
+ */
 error_t memcpy_from_user(void *dst, __user const void *src, size_t len) {
     if (!arch_is_mappable_uaddr((uaddr_t) src)) {
         // カーネルモードでは全ての仮想アドレスにアクセスできる権限があるので、渡されたポインタが
@@ -21,8 +30,15 @@ error_t memcpy_from_user(void *dst, __user const void *src, size_t len) {
     return OK;
 }
 
-// ユーザー空間へのメモリコピー。通常のmemcpyと異なり、コピー中にページフォルトが発生した場合
-// には、カーネルではなく実行中タスクで発生したページフォルトとして処理する。
+/** @ingroup kernel
+ * @brief ユーザー空間へのメモリコピー.
+ * 通常のmemcpyと異なり、コピー中にページフォルトが発生した場合には、
+ * カーネルではなく実行中タスクで発生したページフォルトとして処理する。
+ * @param dst コピー先アドレス
+ * @param src コピー元アドレス
+ * @param len コピーサイズ
+ * @return 成功したらOK, エラーの場合はエラーコード
+ */
 error_t memcpy_to_user(__user void *dst, const void *src, size_t len) {
     if (!arch_is_mappable_uaddr((uaddr_t) dst)) {
         // カーネルモードでは全ての仮想アドレスにアクセスできる権限があるので、渡されたポインタが
@@ -306,7 +322,15 @@ __noreturn static int sys_shutdown(void) {
     arch_shutdown();
 }
 
-// システムコールハンドラ
+/** @ingroup kernel
+ * @brief システムコールハンドラ
+ * @param a0 引数0
+ * @param a1 引数1
+ * @param a2 引数2
+ * @param a3 引数3
+ * @param n システムコール番号
+ * @return 成功したらOK, エラーが発生した場合はエラーコード
+ */
 long handle_syscall(long a0, long a1, long a2, long a3, long a4, long n) {
     long ret;
     switch (n) {

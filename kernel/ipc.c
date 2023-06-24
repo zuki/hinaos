@@ -1,3 +1,4 @@
+/** @file ipc.c */
 #include "ipc.h"
 #include "syscall.h"
 #include "task.h"
@@ -122,7 +123,14 @@ static error_t recv_message(task_t src, __user struct message *m,
     return OK;
 }
 
-// メッセージを送受信する。
+/** @ingroup kernel
+ * @brief メッセージを送受信する.
+ * @param dst 送信先タスク
+ * @param src 送信元タスク
+ * @param m メッセージ（送受信兼用）
+ * @param flags フラグ
+ * @return 成功したらOK, そうでない場合はエラーコード
+*/
 error_t ipc(struct task *dst, task_t src, __user struct message *m,
             unsigned flags) {
     // 送信操作
@@ -144,7 +152,11 @@ error_t ipc(struct task *dst, task_t src, __user struct message *m,
     return OK;
 }
 
-// 通知を送信する。
+/** @ingroup kernel
+ * @brief 通知を送信する.
+ * @param dst 送信先タスク
+ * @param notifications 通知データ
+ */
 void notify(struct task *dst, notifications_t notifications) {
     if (dst->state == TASK_BLOCKED && dst->wait_for == IPC_ANY) {
         // 宛先タスクがオープン受信状態で待っている。NOTIFY_MSGメッセージを送った体で

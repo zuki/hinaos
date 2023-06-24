@@ -1,3 +1,4 @@
+/** @file printk.c */
 #include "printk.h"
 #include "arch.h"
 #include "task.h"
@@ -5,14 +6,26 @@
 #include <libs/common/string.h>
 #include <libs/common/vprintf.h>
 
-// UARTからのデータを待っているタスクのリスト
+/** @ingroup kernel
+ * @var serial_readers
+ * @brief UARTからのデータを待っているタスクのリスト */
 static list_t serial_readers = LIST_INIT(serial_readers);
-// UARTからの入力データのリングバッファと、その読み書き位置
+/** @ingroup kernel
+ * @var input
+ * @brief UARTからの入力データのリングバッファ */
 static char input[128];
+/** @ingroup kernel
+ * @var input_rp
+ * @brief リングバッファの読み取り位置 */
 static int input_rp = 0;
+/** @ingroup kernel
+ * @var input_wp
+ * @brief リングバッファ書き込み位置 */
 static int input_wp = 0;
 
-// UARTからの割り込みハンドラ
+/** @ingroup kernel
+ * @brief UARTからの割り込みハンドラ
+ */
 void handle_serial_interrupt(void) {
     while (true) {
         // 1文字読み込む
@@ -46,7 +59,13 @@ void handle_serial_interrupt(void) {
     }
 }
 
-// UARTからの入力を読み込む。QEMUは標準入力 (一般にキーボード入力) がUARTに繋がっている。
+/** @ingroup kernel
+ * @brief UARTからの入力を読み込む.
+ * QEMUは標準入力 (一般にキーボード入力) がUARTに繋がっている。
+ * @param buf 入力データバッファへのポインタ
+ * @param max_len バッファの最大長
+ * @return 入力データ長
+ */
 int serial_read(char *buf, int max_len) {
     int len = 0;
     while (true) {
@@ -71,12 +90,18 @@ int serial_read(char *buf, int max_len) {
     return len;
 }
 
-// カーネル内部でのみ使用するputchar実装。UARTに出力する。
+/** @ingroup kernel
+ * @brief カーネル内部でのみ使用するputchar実装。UARTに出力する。
+ * @param ch 出力する文字
+ */
 void printchar(char ch) {
     arch_serial_write(ch);
 }
 
-// カーネル内部でのみ使用するprintf実装。UARTに出力する。
+/** @ingroup kernel
+ * @brief カーネル内部でのみ使用するprintf実装。UARTに出力する。
+ * @param fmt フォーマット文字列
+ */
 void printf(const char *fmt, ...) {
     va_list vargs;
     va_start(vargs, fmt);

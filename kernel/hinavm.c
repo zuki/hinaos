@@ -1,3 +1,4 @@
+/** @file hinavm.c */
 #include "hinavm.h"
 #include "ipc.h"
 #include "memory.h"
@@ -5,11 +6,18 @@
 #include <libs/common/print.h>
 #include <libs/common/string.h>
 
-// 符号付き20ビット整数を32ビットへ符号拡張するマクロ
+/** @ingroup kernel
+ * @def SIGN_EXTEND20
+ * @brief 符号付き20ビット整数を32ビットへ符号拡張するマクロ
+ */
 #define SIGN_EXTEND20(x) ((int32_t) ((x & (1 << 19)) ? (x | 0xfff00000) : x))
 
-// バイトコードインタプリタ「HinaVM」の実装。HinaVMタスクが作成されると、ユーザーモードに
-// 入る代わりにこの関数が呼ばれる。
+/** @ingroup kernel
+ * @brief バイトコードインタプリタ「HinaVM」の実装.
+ * HinaVMタスクが作成されると、ユーザーモードに入る代わりに
+ * この関数が呼ばれる。
+ * @param hinavm 実行するバイトコード構造体へのポインタ
+ */
 __noreturn void hinavm_run(struct hinavm *hinavm) {
     struct task *current = CURRENT_TASK;
 

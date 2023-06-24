@@ -7,3 +7,5 @@
 *.pyc
 
 book/
+
+doxy_docs/

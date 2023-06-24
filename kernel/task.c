@@ -1,3 +1,4 @@
+/** @file task.c */
 #include "task.h"
 #include "arch.h"
 #include "ipc.h"
@@ -6,10 +7,22 @@
 #include <libs/common/list.h>
 #include <libs/common/string.h>
 
-static struct task tasks[NUM_TASKS_MAX];        // 全てのタスク管理構造体 (未使用含む)
-static struct task idle_tasks[NUM_CPUS_MAX];    // 各CPUのアイドルタスク
-static list_t runqueue = LIST_INIT(runqueue);   // ランキュー
-list_t active_tasks = LIST_INIT(active_tasks);  // 使用中の管理構造体のリスト
+/** @ingroup kernel
+ * @var tasks
+ * @brief 全てのタスク管理構造体 (未使用含む) */
+static struct task tasks[NUM_TASKS_MAX];
+/** @ingroup kernel
+ * @var idle_tasks
+ * @brief 各CPUのアイドルタスク */
+static struct task idle_tasks[NUM_CPUS_MAX];
+/** @ingroup kernel
+ * @var runqueue
+ * @brief ランキュー */
+static list_t runqueue = LIST_INIT(runqueue);
+/** @ingroup kernel
+ * @var active_tasks
+ * @brief 使用中の管理構造体のリスト */
+list_t active_tasks = LIST_INIT(active_tasks);
 
 // 次に実行するタスクを選択する。
 static struct task *scheduler(void) {
@@ -64,9 +77,12 @@ static error_t init_task_struct(struct task *task, task_t tid, const char *name,
     return OK;
 }
 
-// 自発的なタスク切り替えを行う。もし実行可能なタスクが実行中タスク以外にない場合は、即座に
-// 戻ってくる。その他の場合は、他のタスクに実行が移され、次回タスクが再びスケジュールされたとき
-// に戻ってくる。
+/** @ingroup kernel
+ * @brief 自発的なタスク切り替えを行う.
+ * もし実行可能なタスクが実行中タスク以外にない場合は、即座に
+ * 戻ってくる。その他の場合は、他のタスクに実行が移され、次回
+ * タスクが再びスケジュールされたときに戻ってくる。
+ */
 void task_switch(void) {
     struct task *prev = CURRENT_TASK;  // 実行中タスク
     struct task *next = scheduler();   // 次に実行するタスク
@@ -103,7 +119,12 @@ static task_t alloc_tid(void) {
     return 0;
 }
 
-// タスクIDからタスク管理構造体を取得する。存在しない場合や無効なIDの場合はNULLを返す。
+/** @ingroup kernel
+ * @brief タスクIDからタスク管理構造体を取得する.
+ * @param tid タスクID
+ * @return タスクIDに対応するタスク管理構造体へのポインタ.
+ * 存在しない場合や無効なIDの場合はNULLを返す。
+ */
 struct task *task_find(task_t tid) {
     if (tid < 0 || tid >= NUM_TASKS_MAX) {
         return NULL;
@@ -117,8 +138,12 @@ struct task *task_find(task_t tid) {
     return task;
 }
 
-// タスクをブロック状態にする。実行中タスク自身をブロックする場合は、task_switch関数を
-// 呼び出して他のタスクに実行を移す必要がある。
+/** @ingroup kernel
+ * @brief タスクをブロック状態にする.
+ * 実行中タスク自身をブロックする場合は、task_switch関数を
+ * 呼び出して他のタスクに実行を移す必要がある。
+ * @param task ブロック状態にするタスク
+ */
 void task_block(struct task *task) {
     DEBUG_ASSERT(task != IDLE_TASK);
     DEBUG_ASSERT(task->state == TASK_RUNNABLE);
@@ -126,7 +151,10 @@ void task_block(struct task *task) {
     task->state = TASK_BLOCKED;
 }
 
-// タスクを実行可能状態にする。
+/** @ingroup kernel
+ * @brief タスクを実行可能状態にする
+ * @param task 実行可能状態にするタスク
+ */
 void task_resume(struct task *task) {
     DEBUG_ASSERT(task->state == TASK_BLOCKED);
 
@@ -134,8 +162,13 @@ void task_resume(struct task *task) {
     list_push_back(&runqueue, &task->waitqueue_next);
 }
 
-// タスクを作成する。ipはユーザーモードで実行するアドレス (エントリーポイント)、pagerは
-// ページャータスク。
+/** @ingroup kernel
+ * @brief タスクを作成する.
+ * @param name タスク名
+ * @param ip ユーザーモードで実行するアドレス (エントリーポイント)
+ * @param pager ページャータスク
+ * @return タスクID. エラーが発生した場合はエラーコード.
+ */
 task_t task_create(const char *name, uaddr_t ip, struct task *pager) {
     task_t tid = alloc_tid();
     if (!tid) {
@@ -156,8 +189,16 @@ task_t task_create(const char *name, uaddr_t ip, struct task *pager) {
     return tid;
 }
 
-// HinaVMタスクを作成する。instsはHinaVM命令列、num_instsは命令数、pagerはページャータスク。
-// hinavm.c ではなくここで書かれているのは、init_task_struct関数などを呼び出すため。
+/** @ingroup kernel
+ * @brief HinaVMタスクを作成する.
+ * hinavm.c ではなくここで書かれているのは、init_task_struct関数などを
+ * 呼び出すため。
+ * @param name タスク名
+ * @param insts HinaVM命令列
+ * @param num_insts 命令数
+ * @param pager ページャータスク
+ * @return タスクID. エラーが発生した場合はエラーコード.
+ */
 task_t hinavm_create(const char *name, hinavm_inst_t *insts, uint32_t num_insts,
                      struct task *pager) {
     task_t tid = alloc_tid();
@@ -192,8 +233,13 @@ task_t hinavm_create(const char *name, hinavm_inst_t *insts, uint32_t num_insts,
     return tid;
 }
 
-// タスクを削除する。taskは削除するタスク。taskが実行中のタスクである場合は、この関数では
-// なく、task_exit関数を呼び出す必要がある。
+/** @ingroup kernel
+ * @brief タスクを削除する.
+ * taskが実行中のタスクである場合は、この関数ではなく、
+ * task_exit関数を呼び出す必要がある。
+ * @param task 削除するタスク
+ * @return 成功の場合はOK. そうでなければエラーコード。
+ */
 error_t task_destroy(struct task *task) {
     DEBUG_ASSERT(task != CURRENT_TASK);
     DEBUG_ASSERT(task != IDLE_TASK);
@@ -253,7 +299,10 @@ error_t task_destroy(struct task *task) {
     return OK;
 }
 
-// 実行中タスク (CURRENT_TASK) を終了させる。引数exceptionは終了理由。
+/** @ingroup kernel
+ * @brief 実行中タスク (CURRENT_TASK) を終了させる.
+ * @param exception 終了理由
+ */
 __noreturn void task_exit(int exception) {
     struct task *pager = CURRENT_TASK->pager;
     ASSERT(pager != NULL);
@@ -282,8 +331,11 @@ __noreturn void task_exit(int exception) {
     UNREACHABLE();
 }
 
-// デバッグ用に現在の各タスクの状態を表示する。デッドロックが起きた場合の原因究明に便利。
-// シリアルポートで Ctrl-P が押されると呼び出される。
+/** @ingroup kernel
+ * @brief デバッグ用に現在の各タスクの状態を表示する.
+ * デッドロックが起きた場合の原因究明に便利。
+ * シリアルポートで Ctrl-P が押されると呼び出される。
+ */
 void task_dump(void) {
     WARN("active tasks:");
     LIST_FOR_EACH (task, &active_tasks, struct task, next) {
@@ -318,7 +370,9 @@ void task_dump(void) {
     }
 }
 
-// タスク管理システムの初期化
+/** @ingroup kernel
+ * @brief タスク管理システムの初期化
+ */
 void task_init_percpu(void) {
     // CPUごとのアイドルタスクを作成し、それを実行中タスクとする。
     struct task *idle_task = &idle_tasks[CPUVAR->id];

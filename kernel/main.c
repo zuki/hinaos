@@ -1,3 +1,8 @@
+/**
+ * @file main.c
+ */
+#undef __LP64__
+
 #include "main.h"
 #include "arch.h"
 #include "memory.h"
@@ -74,8 +79,12 @@ __noreturn static void idle_task(void) {
     }
 }
 
-// 0番目のCPUのブート処理: カーネルと最初のタスク (VMサーバ) を初期化した後にアイドルタスク
-// として動作する。
+/**
+ * @ingroup kernel
+ * @brief 0番目のCPUのブート処理. カーネルと最初のタスク (VMサーバ) を初期化した後に
+ * アイドルタスクとして動作する。
+ * @param bootinfo bootinfo構造体へのポインタ
+ */
 void kernel_main(struct bootinfo *bootinfo) {
     printf("Booting HinaOS...\n");
     memory_init(bootinfo);
@@ -89,7 +98,10 @@ void kernel_main(struct bootinfo *bootinfo) {
     idle_task();
 }
 
-// 0番目以外のCPUのブート処理: 各CPUの初期化処理を行った後にアイドルタスクとして動作する。
+/**
+ * @ingroup kernel
+ * @brief 0番目以外のCPUのブート処理. 各CPUの初期化処理を行った後にアイドルタスクとして動作する。
+ */
 void kernel_mp_main(void) {
     task_init_percpu();
     arch_init_percpu();

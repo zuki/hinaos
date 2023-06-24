@@ -1,44 +1,66 @@
+/** @file arch.h */
 #pragma once
 #include <libs/common/types.h>
 
 struct cpuvar;
 #include <arch_types.h>
 
+/** @ingroup kernel
+ * @def CPUVAR_MAGIC
+ * @brief cpuvarマジックナンバー */
 #define CPUVAR_MAGIC 0xbeefbeef
+/** @ingroup kernel
+ * @def CPUVAR
+ * @brief cpuvarを取得する */
 #define CPUVAR       (arch_cpuvar_get())
 
 struct task;
 
+/** @ingroup kernel
+ * @struct cpuvar
+ * @brief cpuvar構造体 */
 struct cpuvar {
-    struct arch_cpuvar arch;
-    int id;
-    bool online;
-    unsigned ipi_pending;
-    struct task *idle_task;
-    struct task *current_task;
-    unsigned magic;
+    struct arch_cpuvar arch;    /**< アーキテクチャ固有のcpuvar */
+    int id;                     /**< cpu番号 */
+    bool online;                /**< 起動完了済み */
+    unsigned ipi_pending;       /**< 保留中のIPI */
+    struct task *idle_task;     /**< アイドルタスクへのポインタ */
+    struct task *current_task;  /**< カレントタスクへのポインタ */
+    unsigned magic;             /**< マジックナンバー */
 };
 
 #define IPI_TLB_FLUSH  (1 << 0)
 #define IPI_RESCHEDULE (1 << 1)
 
+/** @ingroup kernel
+ * @struct memory_map_entry
+ * @brief メモリマップエントリ構造体 */
 struct memory_map_entry {
-    paddr_t paddr;
-    size_t size;
+    paddr_t paddr;              /**< 物理アドレス */
+    size_t size;                /**< サイズ */
 };
 
+/** @ingroup kernel
+ * @def NUM_MEMORY_MAP_ENTRIES_MAX
+ * @brief メモリマップエントリの最大数 */
 #define NUM_MEMORY_MAP_ENTRIES_MAX 8
 
+/** @ingroup kernel
+ * @struct memory_map
+ * @brief メモリマップ構造体 */
 struct memory_map {
-    struct memory_map_entry frees[NUM_MEMORY_MAP_ENTRIES_MAX];
-    struct memory_map_entry devices[NUM_MEMORY_MAP_ENTRIES_MAX];
-    int num_frees;
-    int num_devices;
+    struct memory_map_entry frees[NUM_MEMORY_MAP_ENTRIES_MAX];      /**< RAM領域のマップエントリ */
+    struct memory_map_entry devices[NUM_MEMORY_MAP_ENTRIES_MAX];    /**< MMIO領域のマップエントリ */
+    int num_frees;      /**< 未使用エントリ数 */
+    int num_devices;    /**< MMIOエントリ数 */
 };
 
+/** @ingroup kernel
+ * @struct bootinfo
+ * @brief 起動情報構造体 */
 struct bootinfo {
-    paddr_t boot_elf;
-    struct memory_map memory_map;
+    paddr_t boot_elf;               /**< ELF形式の起動モジュールの先頭アドレス */
+    struct memory_map memory_map;   /**< メモリマップ構造体 */
 };
 
 ARCH_TYPES_STATIC_ASSERTS

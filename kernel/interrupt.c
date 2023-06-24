@@ -1,15 +1,28 @@
+/** @file interrupt.c */
 #include "interrupt.h"
 #include "arch.h"
 #include "ipc.h"
 #include "task.h"
 #include <libs/common/print.h>
 
-// 割り込み通知を受け付けるタスクの一覧。
+/** @ingroup kernel
+ * @var irq_listeners
+ * @brief 割り込み通知を受け付けるタスクの一覧
+*/
 static struct task *irq_listeners[IRQ_MAX];
-// 起動してからの経過時間。単位はタイマー割り込みの周期 (TICK_HZ) に依存する。
+
+/** @ingroup kernel
+ * @var uptime_ticks
+ * @brief 起動してからの経過時間。単位はタイマー割り込みの周期 (TICK_HZ) に依存する
+ */
 unsigned uptime_ticks = 0;
 
-// 割り込み通知を受け付けるようにする。
+/** @ingroup kernel
+ * @brief 割り込み通知を受け付けるようにする.
+ * @param task タスク管理構造体へのポインタ
+ * @param irq 受け付ける割り込み番号
+ * @return 成功したらOK, エラーが発生したらエラーコード
+ */
 error_t irq_listen(struct task *task, unsigned irq) {
     if (irq >= IRQ_MAX) {
         return ERR_INVALID_ARG;
@@ -28,7 +41,12 @@ error_t irq_listen(struct task *task, unsigned irq) {
     return OK;
 }
 
-// 割り込み通知を受け付けないようにする。
+/** @ingroup kernel
+ * @brief 割り込み通知を受け付けないようにする.
+ * @param task タスク管理構造体へのポインタ
+ * @param irq 受け付けない割り込み番号
+ * @return 成功したらOK, エラーが発生したらエラーコード
+ */
 error_t irq_unlisten(struct task *task, unsigned irq) {
     if (irq >= IRQ_MAX) {
         return ERR_INVALID_ARG;
@@ -47,7 +65,10 @@ error_t irq_unlisten(struct task *task, unsigned irq) {
     return OK;
 }
 
-// ハードウェア割り込みハンドラ (タイマー割り込み以外)
+/** @ingroup kernel
+ * @brief ハードウェア割り込みハンドラ (タイマー割り込み以外)
+ * @param irq 割り込み番号
+ */
 void handle_interrupt(unsigned irq) {
     if (irq >= IRQ_MAX) {
         WARN("invalid IRQ: %u", irq);
@@ -64,11 +85,15 @@ void handle_interrupt(unsigned irq) {
     notify(task, NOTIFY_IRQ);
 }
 
-// タイマー割り込みハンドラ
+/** @ingroup kernel
+ * @brief タイマー割り込みハンドラ
+ * @param ticks 経過時間のデルタ
+ */
 void handle_timer_interrupt(unsigned ticks) {
     // 起動してからの経過時間を更新
     uptime_ticks += ticks;
 
+    // タイマー更新するのはプライマリCPUのみ
     if (CPUVAR->id == 0) {
         // 各タスクのタイマーを更新する
         LIST_FOR_EACH (task, &active_tasks, struct task, next) {
