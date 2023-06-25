@@ -1,3 +1,4 @@
+/** @file switch.S */
 // 実行コンテキストを切り替える
 //
 // void riscv32_task_switch(uint32_t *prev_sp, uint32_t *next_sp);

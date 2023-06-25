@@ -1,3 +1,4 @@
+/** @file boot.S */
 #include <buildconfig.h>
 .section ".boot", "ax"
 

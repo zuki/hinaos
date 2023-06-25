@@ -1,3 +1,4 @@
+/** @file debug.c */
 #include "debug.h"
 #include <kernel/arch.h>
 #include <kernel/riscv32/asm.h>
@@ -17,20 +18,28 @@ static uint32_t *stack_bottom(void) {
     return (uint32_t *) ALIGN_DOWN(sp, KERNEL_STACK_SIZE);
 }
 
-// 現在のカーネルスタックの下端にカーネルスタックの有効性をチェックするための値を書き込む。
+/** @ingroup kernel_riscv32
+ * @brief 現在のカーネルスタックの下端にカーネルスタックの有効性をチェックするための値を書き込む。
+ */
 void stack_reset_current_canary(void) {
     stack_set_canary((uint32_t) stack_bottom());
 }
 
-// カーネルスタックの下端にカーネルスタックの有効性をチェックするための値を書き込む。
-// オーバーフローが発生した場合にはこの値が書き換えられているはず。
+/** @ingroup kernel_riscv32
+ * @brief カーネルスタックの下端にカーネルスタックの有効性をチェックするための値を書き込む.
+ * オーバーフローが発生した場合にはこの値が書き換えられているはず。
+ * @param sp_bottom カーネルスタックの下端アドレス
+ */
 void stack_set_canary(uint32_t sp_bottom) {
     *((uint32_t *) sp_bottom) = STACK_CANARY_VALUE;
 }
 
-// カーネルスタックが有効か (オーバーフロー、有効な値か) をチェックする。また、ついでに
-// 割り込みハンドラが呼び出される際に満たしておくべき条件も確認する。割り込み周りは厄介な
-// バグが生まれやすいので、無意味に見えるチェックでもバグの早期発見に効果的である。
+/** @ingroup kernel_riscv32
+ * @brief カーネルスタックが有効か (オーバーフロー、有効な値か) をチェックする.
+ * また、ついでに割り込みハンドラが呼び出される際に満たしておくべき条件も
+ * 確認する。割り込み周りは厄介なバグが生まれやすいので、無意味に見える
+ * チェックでもバグの早期発見に効果的である。
+ */
 void stack_check(void) {
     if (CPUVAR->magic != CPUVAR_MAGIC) {
         PANIC("invalid CPUVAR: addr=%p, magic=%x", CPUVAR, CPUVAR->magic);

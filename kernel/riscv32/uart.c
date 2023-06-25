@@ -1,10 +1,14 @@
+/** @file uart.c */
 // シリアルポートドライバ
 // https://www.lammertbies.nl/comm/info/serial-uart
 #include "uart.h"
 #include "asm.h"
 #include <kernel/arch.h>
 
-// 文字を送信する
+/** @ingroup kernel_riscv32
+ * @brief 文字を送信する
+ * @param ch 書き込む文字
+ */
 void arch_serial_write(char ch) {
     // 送信可能になるまで待つ
     while ((mmio_read8_paddr(UART_LSR) & UART_LSR_TX_FULL) == 0)
@@ -14,6 +18,10 @@ void arch_serial_write(char ch) {
     mmio_write8_paddr(UART_THR, ch);
 }
 
+/** @ingroup kernel_riscv32
+ * @brief 文字を受信する
+ * @return 読み込んだ文字
+ */
 int arch_serial_read(void) {
     // 受信した文字があるかどうかをチェック
     if ((mmio_read8_paddr(UART_LSR) & UART_LSR_RX_READY) == 0) {
@@ -24,7 +32,9 @@ int arch_serial_read(void) {
     return mmio_read8_paddr(UART_RBR);
 }
 
-// デバイスドライバを初期化する
+/** @ingroup kernel_riscv32
+ * @brief デバイスドライバを初期化する
+ */
 void riscv32_uart_init(void) {
     // 割り込みを無効にする
     mmio_write8_paddr(UART_IER, 0);

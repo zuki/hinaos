@@ -1,3 +1,4 @@
+/** @file setup.c */
 #include "asm.h"
 #include "debug.h"
 #include "handler.h"
@@ -13,10 +14,16 @@
 #include <kernel/task.h>
 #include <libs/common/string.h>
 
-// 0番目のCPUが起動したことを示すフラグ
+/** @ingroup kernel_riscv32
+ * @var hart0_ready
+ * @brief 0番目のCPUが起動したことを示すフラグ
+*/
 static volatile bool hart0_ready = false;
 
-// 0番目のCPUのブート処理: riscv32_setup関数の末尾からジャンプされる。ここからS-Mode。
+/** @ingroup kernel_riscv32
+ * @brief 0番目のCPUのブート処理.
+ * riscv32_setup関数の末尾からジャンプされる。ここからS-Mode。
+ */
 __noreturn void riscv32_setup(void) {
     // カーネルロックを取得する。ここから他のCPUと共有するデータを操作できる。
     mp_lock();
@@ -58,7 +65,10 @@ __noreturn void riscv32_setup(void) {
     UNREACHABLE();
 }
 
-// 0番目以外のCPUのブート処理: riscv32_setup関数の末尾からジャンプされる。ここからS-Mode。
+/** @ingroup kernel_riscv32
+ * @brief 0番目以外のCPUのブート処理.
+ * riscv32_setup関数の末尾からジャンプされる。ここからS-Mode。
+ */
 __noreturn void riscv32_setup_mp(void) {
     // カーネルロックを取得する。ここから他のCPUと共有するデータを操作できる。
     mp_lock();
@@ -74,13 +84,18 @@ __noreturn void riscv32_setup_mp(void) {
     UNREACHABLE();
 }
 
-// M-mode上で実行されるブート処理。M-modeでしか行えない初期化処理を行い、S-modeに移行する。
-//
-// ブート処理では、一度のみ行う初期化処理をすべて0番目のCPUで行う。その他のCPUは、0番目のCPUが
-// 起動処理を終えるまで待機した後にブート処理を開始する。
-//
-// 注意: この関数ではCPUローカル変数以外のデータ領域にアクセスしてはならない。カーネルロックを
-//       ここではまだ取得しないため、他のCPUと競合してデータを破壊してしまう。
+/** @ingroup kernel_riscv32
+ * @brief M-mode上で実行されるブート処理.
+ * M-modeでしか行えない初期化処理を行い、S-modeに移行する。
+ *
+ * ブート処理では、一度のみ行う初期化処理をすべて0番目のCPUで行う。
+ * その他のCPUは、0番目のCPUが起動処理を終えるまで待機した後にブート
+ * 処理を開始する。
+ *
+ * 注意: この関数ではCPUローカル変数以外のデータ領域にアクセスしては
+ * ならない。カーネルロックをここではまだ取得しないため、他のCPUと
+ * 競合してデータを破壊してしまう。
+ */
 __noreturn void riscv32_boot(void) {
     int hartid = read_mhartid();  // CPU番号
     if (hartid == 0) {
@@ -155,10 +170,16 @@ __noreturn void riscv32_boot(void) {
     UNREACHABLE();
 }
 
+/** @ingroup kernel_riscv32
+ * @brief アーキテクチャ固有の初期化.
+ */
 void arch_init(void) {
     riscv32_vm_init();
 }
 
+/** @ingroup kernel_riscv32
+ * @brief アーキテクチャ固有のCPUごとに行う初期化
+ */
 void arch_init_percpu(void) {
     // タスクが既に初期化されているはず
     ASSERT(CURRENT_TASK == IDLE_TASK);
@@ -189,7 +210,10 @@ void arch_init_percpu(void) {
     }
 }
 
-// アイドルタスクのメイン処理。割り込みが来るまでCPUを休ませる。
+/** @ingroup kernel_riscv32
+ * @brief アイドルタスクのメイン処理.
+ * 割り込みが来るまでCPUを休ませる。
+ */
 void arch_idle(void) {
     // 割り込みハンドラが自身でカーネルロックをとっているので、ここではロックを解除する
     mp_unlock();
@@ -204,6 +228,9 @@ void arch_idle(void) {
     mp_lock();
 }
 
+/** @ingroup kernel_riscv32
+ * @brief アーキテクチャ固有のshutdown処理
+ */
 __noreturn void arch_shutdown(void) {
     // ページングを無効化する
     write_satp(0);
@@ -215,13 +242,17 @@ __noreturn void arch_shutdown(void) {
     PANIC("failed to shutdown");
 }
 
-// パニック関数が呼ばれ、パニックメッセージを出力する前に呼ばれる。
+/** @ingroup kernel_riscv32
+ * @brief パニック関数が呼ばれ、パニックメッセージを出力する前に呼ばれる。
+ */
 void panic_before_hook(void) {
     // 無理矢理カーネルロックを取得してパニックメッセージを出力する。
     mp_force_lock();
 }
 
-// パニック関数が呼ばれ、パニックメッセージを出力した後に呼ばれる。
+/** @ingroup kernel_riscv32
+ * @brief パニック関数が呼ばれ、パニックメッセージを出力した後に呼ばれる。
+ */
 __noreturn void panic_after_hook(void) {
     // コンピュータを停止する。ただしトラブルシューティングできるようシャットダウンはしない。
     halt();

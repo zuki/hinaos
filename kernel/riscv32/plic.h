@@ -1,8 +1,18 @@
+/** @file plic.h */
 #pragma once
 
-#define NUM_IRQS_MAX 1024                    // PLICの最大割り込み数
-#define PLIC_ADDR    ((paddr_t) 0x0c000000)  // PLICの物理アドレス
-#define PLIC_SIZE    0x400000                // PLICのMMIO領域のサイズ
+/** @ingroup kernel_riscv32
+ * @def NUM_IRQS_MAX
+ * @brief PLICの最大割り込み数 */
+#define NUM_IRQS_MAX 1024
+/** @ingroup kernel_riscv32
+ * @def PLIC_ADDR
+ * @brief PLICの物理アドレス */
+#define PLIC_ADDR    ((paddr_t) 0x0c000000)
+/** @ingroup kernel_riscv32
+ * @def PLIC_SIZE
+ * @brief PLICのMMIO領域のサイズ */
+#define PLIC_SIZE    0x400000
 
 // Interrupt Source Priority
 // https://github.com/riscv/riscv-plic-spec/blob/master/riscv-plic.adoc#3-interrupt-priorities

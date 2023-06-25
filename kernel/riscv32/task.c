@@ -1,3 +1,4 @@
+/** @file task.c */
 #include "asm.h"
 #include "debug.h"
 #include "mp.h"
@@ -8,7 +9,10 @@
 #include <kernel/printk.h>
 #include <kernel/task.h>
 
-// ユーザータスクへの最初のコンテキストスイッチ時に呼び出される関数
+/** @ingroup kernel_riscv32
+ * @brief ユーザータスクへの最初のコンテキストスイッチ時に呼び出される関数
+ * @param ip 実行アドレス
+ */
 __noreturn void riscv32_user_entry(uint32_t ip) {
     mp_unlock();     // ユーザーモードへ入るのでカーネルロックを解放する
     write_sepc(ip);  // ユーザータスクの実行開始アドレスを設定
@@ -58,7 +62,11 @@ __noreturn void riscv32_user_entry(uint32_t ip) {
     UNREACHABLE();
 }
 
-// 次のタスク (next) に切り替える。prevには現在実行中のタスクを指定する。
+/** @ingroup kernel_riscv32
+ * @brief 次のタスク (next) に切り替える。prevには現在実行中のタスクを指定する
+ * @param prev 現在実行中のタスクへのポインタ
+ * @param next 次のタスクへのポインタ
+ */
 void arch_task_switch(struct task *prev, struct task *next) {
     // 割り込みハンドラで使うカーネルスタックを切り替える。システムコールハンドラ内で
     // スリープ状態に入ることがあるため、タスクごとに実行コンテキストを保持する専用の
@@ -79,7 +87,14 @@ void arch_task_switch(struct task *prev, struct task *next) {
     riscv32_task_switch(&prev->arch.sp, &next->arch.sp);
 }
 
-// タスクを初期化する
+/** @ingroup kernel_riscv32
+ * @brief タスクを初期化する.
+ * @param task タスク管理構造体へのポインタ
+ * @param ip ユーザランドの実行アドレス
+ * @param kernel_entory カーネルのエントリポインタ
+ * @param arg 引数へのポインタ
+ * @return 成功したらOK, エラーが発生したらエラーコード
+ */
 error_t arch_task_init(struct task *task, uaddr_t ip, vaddr_t kernel_entry,
                        void *arg) {
     // カーネルスタックを割り当てる。スタックカナリー (stack canary) のアドレスを常に
@@ -132,7 +147,10 @@ error_t arch_task_init(struct task *task, uaddr_t ip, vaddr_t kernel_entry,
     return OK;
 }
 
-// タスクを破棄する
+/** @ingroup kernel_riscv32
+ * @brief タスクを破棄する
+ * @param task タスク管理構造体へのポインタ
+ */
 void arch_task_destroy(struct task *task) {
     pm_free(task->arch.sp_bottom, KERNEL_STACK_SIZE);
 }

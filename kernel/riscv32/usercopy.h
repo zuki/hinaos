@@ -1,3 +1,4 @@
+/** @file usercopy.h */
 #pragma once
 
 extern char riscv32_usercopy1[];

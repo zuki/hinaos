@@ -1,11 +1,21 @@
+/** @file mp.c */
 #include "mp.h"
 #include "asm.h"
 #include <kernel/arch.h>
 #include <kernel/printk.h>
 #include <kernel/task.h>
 
+/** @ingroup kernel_riscv32
+ * @var cpuvars
+ * @brief CPUローカル変数の配列 */
 static struct cpuvar cpuvars[NUM_CPUS_MAX];
+/** @ingroup kernel_riscv32
+ * @var big_lock
+ * @brief ビッグロック */
 static uint32_t big_lock = BKL_UNLOCKED;
+/** @ingroup kernel_riscv32
+ * @var locked_cpu
+ * @brief ロックを持っているCPU */
 static int locked_cpu = -1;
 
 // setssipレジスタ (ACLINT) への書き込みをしてIPIを発行する。
@@ -16,6 +26,7 @@ static void write_setssip(uint32_t hartid) {
 
 // カーネルロック取得前に満たしておくべき条件をチェックする
 static void check_lock(void) {
+    // 割り込みが無効になっていること
     DEBUG_ASSERT((read_sstatus() & SSTATUS_SIE) == 0);
 
     if (big_lock == BKL_HALTED) {
@@ -27,7 +38,9 @@ static void check_lock(void) {
     }
 }
 
-// カーネルロックを取得する
+/** @ingroup kernel_riscv32
+ * @brief カーネルロックを取得する.
+ */
 void mp_lock(void) {
     check_lock();  // ロックの状態をチェック (デバッグ用)
 
@@ -45,7 +58,9 @@ void mp_lock(void) {
     full_memory_barrier();
 }
 
-// カーネルロックを解放する
+/** @ingroup kernel_riscv32
+ * @brief カーネルロックを解放する.
+ */
 void mp_unlock(void) {
     DEBUG_ASSERT(CPUVAR->id == locked_cpu);
 
@@ -57,21 +72,31 @@ void mp_unlock(void) {
     compare_and_swap(&big_lock, BKL_LOCKED, BKL_UNLOCKED);
 }
 
-// カーネルロックを強制的に取得する。カーネルパニックなど致命的なエラーが発生したときに
-// 他のCPUからロックを奪い取ってカーネルを停止するために使う。
+/** @ingroup kernel_riscv32
+ * @brief カーネルロックを強制的に取得する.
+ * カーネルパニックなど致命的なエラーが発生したときに
+ * 他のCPUからロックを奪い取ってカーネルを停止するために使う。
+ */
 void mp_force_lock(void) {
     big_lock = BKL_LOCKED;
     locked_cpu = CPUVAR->id;
     full_memory_barrier();
 }
 
-// 指定したCPUのCPUローカル変数を取得する
+/** @ingroup kernel_riscv32
+ * @brief 指定したCPUのCPUローカル変数を取得する.
+ * @param hartid CPU番号
+ * @return 指定したCPUのCPUローカル変数へのポインタ
+ */
 struct cpuvar *riscv32_cpuvar_of(int hartid) {
     ASSERT(hartid < NUM_CPUS_MAX);
     return &cpuvars[hartid];
 }
 
-// 他のCPUにプロセッサ間割り込み (IPI) を送信する
+/** @ingroup kernel_riscv32
+ * @brief 他のCPUにプロセッサ間割り込み (IPI) を送信する.
+ * @param ipi ipi割り込み情報
+ */
 void arch_send_ipi(unsigned ipi) {
     // 自身を除いた全CPUにIPIを送信する
     for (int hartid = 0; hartid < NUM_CPUS_MAX; hartid++) {
@@ -106,12 +131,16 @@ void arch_send_ipi(unsigned ipi) {
     }
 }
 
-// 各CPUの初期化処理
+/** @ingroup kernel_riscv32
+ * @brief 各CPUの初期化処理.
+ */
 void riscv32_mp_init_percpu(void) {
     CPUVAR->online = true;
 }
 
-// コンピュータを停止する
+/** @ingroup kernel_riscv32
+ * @brief コンピュータを停止する.
+ */
 __noreturn void halt(void) {
     big_lock = BKL_HALTED;
     full_memory_barrier();

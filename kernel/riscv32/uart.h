@@ -1,3 +1,4 @@
+/** @file uart.h */
 // UARTデバイス
 // https://www.lammertbies.nl/comm/info/serial-uart
 #pragma once

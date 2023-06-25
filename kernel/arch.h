@@ -82,7 +82,19 @@ void arch_init(void);
 void arch_init_percpu(void);
 void arch_idle(void);
 void arch_send_ipi(unsigned ipi);
+/** @ingroup kernel_riscv32
+ * @brief ユーザ空間からカーネル空間にコピーする
+ * @param dst コピー先（カーネル空間）のアドレス
+ * @param src コピー元（ユーザ空間）のアドレス
+ * @param len コピー長
+ */
 void arch_memcpy_from_user(void *dst, __user const void *src, size_t len);
+/** @ingroup kernel_riscv32
+ * @brief カーネル空間からにユーザ空間コピーする
+ * @param dst コピー先（ユーザ空間）のアドレス
+ * @param src コピー元（カーネル空間）のアドレス
+ * @param len コピー長
+ */
 void arch_memcpy_to_user(__user void *dst, const void *src, size_t len);
 error_t arch_irq_enable(unsigned irq);
 error_t arch_irq_disable(unsigned irq);

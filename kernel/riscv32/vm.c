@@ -1,3 +1,4 @@
+/** @file vm.c */
 #include "vm.h"
 #include "asm.h"
 #include "mp.h"
@@ -8,8 +9,11 @@
 #include <kernel/printk.h>
 #include <libs/common/string.h>
 
-// カーネルメモリ領域がマップされたページテーブル。起動時に生成され、各タスクの作成時にこの
-// ページテーブルの内容がコピーされる。
+/** @ingroup kernel_riscv32
+ * @var kernel_vm
+ * @brief カーネルメモリ領域がマップされたページテーブル.
+ * 起動時に生成され、各タスクの作成時にこのページテーブルの
+ * 内容がコピーされる。 */
 static struct arch_vm kernel_vm;
 
 // PAGE_* マクロで指定したページ属性をSv32のそれに変換する。
@@ -58,7 +62,14 @@ static error_t walk(paddr_t base, vaddr_t vaddr, bool alloc, pte_t **pte) {
     return OK;
 }
 
-// ページをマップする。
+/** @ingroup kernel_riscv32
+ * @brief ページをマップする.
+ * @param vm ページャ構造体へのポインタ
+ * @param vaddr 仮想アドレス
+ * @param paddr 物理アドレス
+ * @param attrs 属性
+ * @return error_tによる処理結果
+ */
 error_t arch_vm_map(struct arch_vm *vm, vaddr_t vaddr, paddr_t paddr,
                     unsigned attrs) {
     DEBUG_ASSERT(IS_ALIGNED(vaddr, PAGE_SIZE));
@@ -88,7 +99,12 @@ error_t arch_vm_map(struct arch_vm *vm, vaddr_t vaddr, paddr_t paddr,
     return OK;
 }
 
-// ページをアンマップする。
+/** @ingroup kernel_riscv32
+ * @brief ページをアンマップする.
+ * @param vm ページャへのポインタ
+ * @param vaddr アンマップするページの仮想アドレス
+ * @return error_tによる処理結果
+ */
 error_t arch_vm_unmap(struct arch_vm *vm, vaddr_t vaddr) {
     // ページテーブルエントリを探す
     pte_t *pte;
@@ -115,7 +131,11 @@ error_t arch_vm_unmap(struct arch_vm *vm, vaddr_t vaddr) {
     return OK;
 }
 
-// 仮想アドレスがページテーブルにマップされているかどうかを返す。
+/** @ingroup kernel_riscv32
+ * @brief 仮想アドレスがページテーブルにマップされているかどうかを返す.
+ * @param satp Supervisor Address Translation and Protectionレジスタ値
+ * @param vaddr チェック対象の仮想アドレス
+ */
 bool riscv32_is_mapped(uint32_t satp, vaddr_t vaddr) {
     satp = (satp & SATP_PPN_MASK) << SATP_PPN_SHIFT;
     uint32_t *pte;
@@ -123,7 +143,10 @@ bool riscv32_is_mapped(uint32_t satp, vaddr_t vaddr) {
     return err == OK && pte != NULL && (*pte & PTE_V);
 }
 
-// ページテーブルを初期化する。
+/** @ingroup kernel_riscv32
+ * @brief ページテーブルを初期化する.
+ * @param vm ページャへのポインタ
+ */
 error_t arch_vm_init(struct arch_vm *vm) {
     // ページテーブル (1段目) を割り当てる
     vm->table = pm_alloc(PAGE_SIZE, NULL, PM_ALLOC_ZEROED);
@@ -137,7 +160,10 @@ error_t arch_vm_init(struct arch_vm *vm) {
     return OK;
 }
 
-// ページテーブルを破棄する。
+/** @ingroup kernel_riscv32
+ * @brief ページテーブルを破棄する.
+ * @param vm ページャへのポインタ
+ */
 void arch_vm_destroy(struct arch_vm *vm) {
     // 仮想アドレスを走査して、ユーザ空間のページを解放する
     uint32_t *l1table = (uint32_t *) arch_paddr_to_vaddr(vm->table);
@@ -182,7 +208,9 @@ static error_t map_pages(struct arch_vm *vm, vaddr_t vaddr, paddr_t paddr,
     return OK;
 }
 
-// ページング管理機構を初期化する。
+/** @ingroup kernel_riscv32
+ * @brief ページング管理機構を初期化する.
+ */
 void riscv32_vm_init(void) {
     // カーネルメモリのためのページテーブルを割り当てる
     kernel_vm.table = pm_alloc(PAGE_SIZE, NULL, PM_ALLOC_ZEROED);

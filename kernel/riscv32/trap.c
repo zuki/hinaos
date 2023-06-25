@@ -1,3 +1,4 @@
+/** @file trap.c */
 #include "trap.h"
 #include "asm.h"
 #include "debug.h"
@@ -104,6 +105,7 @@ static void handle_page_fault_trap(struct riscv32_trap_frame *frame) {
     // 発生時のプログラムカウンタを取得
     uint32_t sepc = read_sepc();
 
+    // riscv32_usercopy1, riscv32_usercopy2はusercopy.Sで定義
     if (sepc == (uint32_t) riscv32_usercopy1
         || sepc == (uint32_t) riscv32_usercopy2) {
         // ユーザーポインタ上でのコピー中にページフォルトが発生した場合は、
@@ -128,7 +130,12 @@ static void handle_page_fault_trap(struct riscv32_trap_frame *frame) {
     }
 }
 
-// 割り込み・例外ハンドラ: ブート処理を完了したあとは、この関数がカーネルモードへの入り口となる。
+
+/** @ingroup kernel_riscv32
+ * @brief 割り込み・例外ハンドラ.
+ * ブート処理を完了したあとは、この関数がカーネルモードへの入り口となる。
+ * @param frame トラップフレーム構造体へのポインタ
+ */
 void riscv32_handle_trap(struct riscv32_trap_frame *frame) {
     stack_check();  // スタックオーバーフローをチェック
 
