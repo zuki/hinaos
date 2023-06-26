@@ -1,3 +1,4 @@
+/** @file malloc.c */
 #include <libs/common/list.h>
 #include <libs/common/print.h>
 #include <libs/common/string.h>
@@ -6,7 +7,10 @@
 extern char __heap[];      // ヒープ領域の先頭アドレス
 extern char __heap_end[];  // ヒープ領域の終端アドレス
 
-// 未使用チャンクリスト
+/** @ingroup user
+ * @var free_chunks
+ * @brief 未使用チャンクリスト
+ */
 static list_t free_chunks = LIST_INIT(free_chunks);
 
 // ptrからlenバイトのメモリ領域を新しいチャンクとして登録する。
@@ -40,8 +44,12 @@ static void split(struct malloc_chunk *chunk, size_t cap) {
     insert(new_chunk, new_chunk_size);
 }
 
-// 動的メモリ割り当て。ヒープからメモリを割り当てる。C標準ライブラリと違い、メモリ割り当てに
-// 失敗したときはプログラムを終了する。
+/** @ingroup user
+ * @brief 動的メモリ割り当て. ヒープからメモリを割り当てる。
+ * C標準ライブラリと違い、メモリ割り当てに失敗したときはプログラムを終了する。
+ * @param size 割り当てるメモリサイズ
+ * @return 割り当てたメモリのデータ部の先頭アドレス
+ */
 void *malloc(size_t size) {
     // 要求サイズを8以上の8にアライメントされた数にする。
     // つまり、8、16、24、32、...という単位で割り当てる。
@@ -86,7 +94,10 @@ static struct malloc_chunk *get_chunk_from_ptr(void *ptr) {
     return chunk;
 }
 
-// malloc関数で割り当てたメモリ領域を解放する。
+/** @ingroup user
+ * @brief malloc関数で割り当てたメモリ領域を解放する.
+ * @param ptr malloc関数で割り当てられたメモリ領域のアドレス
+ */
 void free(void *ptr) {
     struct malloc_chunk *chunk = get_chunk_from_ptr(ptr);
     if (chunk->magic == MALLOC_FREE) {
@@ -99,8 +110,13 @@ void free(void *ptr) {
     list_push_back(&free_chunks, &chunk->next);
 }
 
-// メモリ再割り当て。malloc関数で割り当てたメモリ領域をsizeバイトに拡張した
-// 新しいメモリ領域を返す。
+/** @ingroup user
+ * @brief メモリ再割り当て. malloc関数で割り当てたメモリ領域を
+ * sizeバイトに拡張した新しいメモリ領域を返す。
+ * @param ptr malloc関数で割り当てられたメモリ領域のアドレス
+ * @param size 再割当てするサイズ
+ * @return 再割り当てしたメモリのデータ部の先頭アドレス
+ */
 void *realloc(void *ptr, size_t size) {
     if (!ptr) {
         return malloc(size);
@@ -120,8 +136,12 @@ void *realloc(void *ptr, size_t size) {
     return new_ptr;
 }
 
-// 文字列を新しく割り当てたメモリ領域にコピーし、その先頭アドレスを返す。
-// メモリリークを防ぐために、free関数で解放する必要がある。
+/** @ingroup user
+ * @brief 文字列を新しく割り当てたメモリ領域にコピーし、その先頭アドレスを返す.
+ * メモリリークを防ぐために、free関数で解放する必要がある。
+ * @param s 文字列
+ * @return コピーしたメモリ領域の先頭アドレス
+ */
 char *strdup(const char *s) {
     size_t len = strlen(s);
     char *new_s = malloc(len + 1);
@@ -129,7 +149,10 @@ char *strdup(const char *s) {
     return new_s;
 }
 
-// 動的メモリ割り当ての初期化。ヒープ領域を未使用チャンクリストに追加する。
+/** @ingroup user
+ * @brief 動的メモリ割り当ての初期化.
+ * ヒープ領域を未使用チャンクリストに追加する。
+ */
 void malloc_init(void) {
     // ヒープ領域 (__heap, __heap_end) はリンカースクリプトで定義される。
     insert(__heap, (size_t) __heap_end - (size_t) __heap);

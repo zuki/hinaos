@@ -1,3 +1,4 @@
+/** @file syscall.h */
 #pragma once
 #include <arch_syscall.h>
 #include <libs/common/hinavm_types.h>

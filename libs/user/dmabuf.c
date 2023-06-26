@@ -1,3 +1,4 @@
+/** @file dmabuf.c */
 #include "dmabuf.h"
 #include "driver.h"
 #include <libs/common/print.h>
@@ -10,8 +11,12 @@ static void check_paddr(dmabuf_t dmabuf, paddr_t paddr) {
     ASSERT(paddr < dmabuf->paddr + dmabuf->entry_size * dmabuf->num_entries);
 }
 
-// DMAバッファ管理構造体を生成する。entry_sizeはバッファの1つの要素のサイズ。num_entriesは
-// バッファの要素数。失敗時にはNULLを返す。
+/** @ingroup user
+ * @brief DMAバッファ管理構造体を生成する.
+ * @param entry_size バッファの1つの要素のサイズ
+ * @param num_entries バッファの要素数
+ * @return 生成したDMAバッファ管理構造体へのポインタ, 失敗時にはNULL
+ */
 dmabuf_t dmabuf_create(size_t entry_size, size_t num_entries) {
     // 返すアドレスがアライメントされることを保証
     entry_size = ALIGN_UP(entry_size, 4);
@@ -36,7 +41,12 @@ dmabuf_t dmabuf_create(size_t entry_size, size_t num_entries) {
     return dmabuf;
 }
 
-// DMAバッファをひとつ割り当てる。失敗時にはNULLを返す。
+/** @ingroup user
+ * @brief DMAバッファをひとつ割り当てる.
+ * @param dmabuf DMAバッファ管理構造体
+ * @param paddr 割り当てられたDMAバッファの物理アドレスを格納する変数へのポインタ
+ * @return 割り当てたDMAバッファ, 失敗時にはNULL
+ */
 void *dmabuf_alloc(dmabuf_t dmabuf, paddr_t *paddr) {
     for (size_t i = 0; i < dmabuf->num_entries; i++) {
         if (!dmabuf->used[i]) {
@@ -49,13 +59,22 @@ void *dmabuf_alloc(dmabuf_t dmabuf, paddr_t *paddr) {
     return NULL;
 }
 
-// dmabuf_alloc関数で割り当てた物理アドレスから対応する仮想アドレスを得る。
+/** @ingroup user
+ * @brief dmabuf_alloc関数で割り当てた物理アドレスから対応する仮想アドレスを得る.
+ * @param dmabuf DMAバッファ管理構造体
+ * @param paddr DMAバッファの物理アドレス
+ * @return paddrに対応する仮想アドレス
+ */
 void *dmabuf_p2v(dmabuf_t dmabuf, paddr_t paddr) {
     check_paddr(dmabuf, paddr);
     return (void *) (dmabuf->uaddr + paddr - dmabuf->paddr);
 }
 
-// dmabuf_alloc関数で割り当てたDMAバッファを解放する。
+/** @ingroup user
+ * @brief dmabuf_alloc関数で割り当てたDMAバッファを解放する.
+ * @param dmabuf DMAバッファ管理構造体
+ * @param paddr DMAバッファの物理アドレス
+ */
 void dmabuf_free(dmabuf_t dmabuf, paddr_t paddr) {
     check_paddr(dmabuf, paddr);
     size_t index = (paddr - dmabuf->paddr) / dmabuf->entry_size;

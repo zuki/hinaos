@@ -1,11 +1,18 @@
+/** @file driver.c */
 // デバイスドライバAPI。基本的にはVMサーバに対するメッセージパッシングのラッパー。
 #include <libs/user/driver.h>
 #include <libs/user/ipc.h>
 
-// 指定された物理メモリ領域を空いている仮想アドレス領域にマップする。MMIO領域にアクセスしたい
-// 時に使える。
-//
-// 引数 map_flags にはメモリ領域の権限 PAGE_(READABLE|WRITABLE|EXECUTABLE) を指定する。
+/** @ingroup user
+ * @brief 指定された物理メモリ領域を空いている仮想アドレス領域にマップする.
+ * MMIO領域にアクセスしたい時に使える。
+ * @param paddr 物理アドレス領域
+ * @param size サイズ
+ * @param map_flags メモリ領域の権限.
+ *      PAGE_(READABLE|WRITABLE|EXECUTABLE) を指定する。
+ * @param uaddr マップされた仮想アドレスを格納する変数へのポインタ
+ * @return 成功したらOK, エラーの場合はエラーコード.
+ */
 error_t driver_map_pages(paddr_t paddr, size_t size, int map_flags,
                          uaddr_t *uaddr) {
     struct message m;
@@ -22,9 +29,15 @@ error_t driver_map_pages(paddr_t paddr, size_t size, int map_flags,
     return OK;
 }
 
-// 物理メモリ領域を確保する。
-//
-// 引数 map_flags にはメモリ領域の権限 PAGE_(READABLE|WRITABLE|EXECUTABLE) を指定する。
+/** @ingroup user
+ * @brief 物理メモリ領域を確保する.
+ * @param size サイズ
+ * @param map_flags メモリ領域の権限.
+ *      PAGE_(READABLE|WRITABLE|EXECUTABLE) を指定する。
+ * @param uaddr 確保したメモリ領域の仮想アドレスを格納する変数へのポインタ
+ * @param paddr 確保したメモリ領域の物理アドレスを格納する変数へのポインタ
+ * @return 成功したらOK, エラーの場合はエラーコード.
+ */
 error_t driver_alloc_pages(size_t size, int map_flags, uaddr_t *uaddr,
                            paddr_t *paddr) {
     struct message m;

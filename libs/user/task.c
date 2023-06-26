@@ -1,7 +1,11 @@
+/** @file task.c */
 #include <libs/user/syscall.h>
 #include <libs/user/task.h>
 
-// 実行中タスクのタスクIDを取得する。
+/** @ingroup user
+ * @brief 実行中タスクのタスクIDを取得する.
+ * @return タスクID
+ */
 task_t task_self(void) {
     static task_t tid = 0;
     if (tid) {

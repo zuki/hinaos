@@ -1,10 +1,20 @@
+/** @file print.c */
 #include <libs/common/string.h>
 #include <libs/common/vprintf.h>
 #include <libs/user/syscall.h>
 
-static char printbuf[256];  // 文字出力リングバッファ
-static int head = 0;        // リングバッファの書き込み位置
-static int tail = 0;        // リングバッファの読み込み位置
+/** @ingroup user
+ * @var printbuf
+ * @brief 文字出力リングバッファ */
+static char printbuf[256];
+/** @ingroup user
+ * @var head
+ * @brief リングバッファの書き込み位置 */
+static int head = 0;
+/** @ingroup user
+ * @var tail
+ * @brief リングバッファの読み込み位置 */
+static int tail = 0;
 
 // カーネルのシリアル出力システムコールを呼び出す。
 static void write_all(const char *str, size_t len) {
@@ -20,7 +30,9 @@ static void write_all(const char *str, size_t len) {
     }
 }
 
-// リングバッファの内容をカーネルに出力する。
+/** @ingroup user
+ * @brief リングバッファの内容をカーネルに出力する。
+ */
 void printf_flush(void) {
     if (tail < head) {
         write_all(&printbuf[tail], head - tail);
@@ -37,7 +49,10 @@ void printf_flush(void) {
     }
 }
 
-// 文字を出力する
+/** @ingroup user
+ * @brief 文字を出力する
+ * @param ch 文字
+ */
 void printchar(char ch) {
     // リングバッファに文字を追加する
     printbuf[head] = ch;
@@ -49,7 +64,10 @@ void printchar(char ch) {
     }
 }
 
-// 文字列を出力する
+/** @ingroup user
+ * @brief 文字列を出力する
+ * @param fmt フォーマット文字列
+ */
 void printf(const char *fmt, ...) {
     va_list vargs;
     va_start(vargs, fmt);
@@ -57,12 +75,16 @@ void printf(const char *fmt, ...) {
     va_end(vargs);
 }
 
-// パニック関数が呼ばれ、パニックメッセージを出力する前に呼ばれる。
+/** @ingroup user
+ * @brief パニック関数が呼ばれ、パニックメッセージを出力する前に呼ばれる。
+ */
 void panic_before_hook(void) {
     // 何もしない
 }
 
-// パニック関数が呼ばれ、パニックメッセージを出力した後に呼ばれる。
+/** @ingroup user
+ * @brief パニック関数が呼ばれ、パニックメッセージを出力した後に呼ばれる。
+ */
 __noreturn void panic_after_hook(void) {
     sys_task_exit();
 }

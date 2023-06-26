@@ -1,3 +1,4 @@
+/** @file ipc.h */
 #pragma once
 #include <libs/common/message.h>
 #include <libs/common/types.h>

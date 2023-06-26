@@ -1,3 +1,4 @@
+/** @file ipc.c */
 #include <libs/common/list.h>
 #include <libs/common/print.h>
 #include <libs/common/string.h>
@@ -6,17 +7,26 @@
 #include <libs/user/syscall.h>
 #include <libs/user/task.h>
 
-// 非同期メッセージ
+/** @ingroup user
+ * @struct async_message
+ * @brief 非同期メッセージ構造体
+ */
 struct async_message {
-    list_elem_t next;  // 送信キューのリスト
-    task_t dst;        // 宛先タスク
-    struct message m;  // メッセージ
+    list_elem_t next;  /**< 送信キューのリスト */
+    task_t dst;        /**<  宛先タスク */
+    struct message m;  /**<  メッセージ */
 };
 
-// このタスクから他のタスクに向けて送信される非同期メッセージリスト。
-// 他のタスクから問い合わせ (ASYNC_RECV_MSG) があると、このリストからメッセージを探す。
+/** @ingroup user
+ * @var async_messages
+ * @brief このタスクから他のタスクに向けて送信される非同期メッセージリスト.
+ * 他のタスクから問い合わせ (ASYNC_RECV_MSG) があると、このリストからメッセージを探す。
+ */
 static list_t async_messages = LIST_INIT(async_messages);
-// 受信済みの通知 (ビットフィールド)。
+/** @ingroup user
+ * @var pending_notifications
+ * @brief 受信済みの通知 (ビットフィールド)。
+ */
 static notifications_t pending_notifications = 0;
 
 // ASYNC_RECV_MSGを受信した際の処理 (ノンブロッキング)
@@ -43,7 +53,12 @@ static error_t async_reply(task_t dst) {
     return OK;
 }
 
-// 非同期メッセージを送信する (ノンブロッキング)
+/** @ingroup user
+ * @brief 非同期メッセージを送信する (ノンブロッキング)
+ * @param dst 送信先タスク
+ * @param m 送信する非同期メッセージ
+ * @return 成功したらOK, そうでなければエラーコード.
+ */
 error_t ipc_send_async(task_t dst, struct message *m) {
     // メッセージを送信キューに挿入する
     struct async_message *am = malloc(sizeof(*am));
@@ -56,25 +71,44 @@ error_t ipc_send_async(task_t dst, struct message *m) {
     return ipc_notify(dst, NOTIFY_ASYNC(task_self()));
 }
 
-// メッセージを送信する。宛先タスクが受信状態になるまでブロックする。
+/** @ingroup user
+ * @brief メッセージを送信する. 宛先タスクが受信状態になるまでブロックする。
+ * @param dst 送信先タスク
+ * @param m 送信するメッセージ
+ * @return 成功したらOK, そうでなければエラーコード.
+ */
 error_t ipc_send(task_t dst, struct message *m) {
     return sys_ipc(dst, 0, m, IPC_SEND);
 }
 
-// メッセージを送信する。即座にメッセージ送信を完了できない場合は ERR_WOULD_BLOCK を返す。
+/** @ingroup user
+ * @brief メッセージを送信する. 即座にメッセージ送信を完了できない場合は
+ * ERR_WOULD_BLOCK を返す。
+ * @param dst 送信先タスク
+ * @param m 送信するメッセージ
+ * @return 成功したらOK, そうでなければエラーコード.
+ */
 error_t ipc_send_noblock(task_t dst, struct message *m) {
     return sys_ipc(dst, 0, m, IPC_SEND | IPC_NOBLOCK);
 }
 
-// メッセージを送信する。即座にメッセージ送信を完了できない場合は警告メッセージを出力し、
-// メッセージを破棄する。
+/** @ingroup user
+ * @brief メッセージを送信する. 即座にメッセージ送信を完了できない場合は
+ * 警告メッセージを出力し、メッセージを破棄する。
+ * @param dst 送信先タスク
+ * @param m 送信するメッセージ
+ */
 void ipc_reply(task_t dst, struct message *m) {
     error_t err = ipc_send_noblock(dst, m);
     OOPS_OK(err);
 }
 
-// エラーメッセージを送信する。即座にメッセージ送信を完了できない場合は警告メッセージを出力し、
-// メッセージを破棄する。
+/** @ingroup user
+ * @brief エラーメッセージを送信する. 即座にメッセージ送信を完了できない場合は
+ * 警告メッセージを出力し、メッセージを破棄する。
+ * @param dst 送信先タスク
+ * @param error 送信するエラーメッセージ
+ */
 void ipc_reply_err(task_t dst, error_t error) {
     struct message m;
     m.type = error;
@@ -170,9 +204,13 @@ static error_t ipc_recv_any(struct message *m) {
     }
 }
 
-// メッセージを受信する。メッセージが届くまでブロックする。
-//
-// src が IPC_ANY の場合は、任意のタスクからのメッセージを受信する (オープン受信)。
+/** @ingroup user
+ * @brief メッセージを受信する. メッセージが届くまでブロックする。
+ * srcがIPC_ANYの場合は、任意のタスクからのメッセージを受信する (オープン受信)。
+ * @param src 送信元タスク
+ * @param m 受信メッセージ
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t ipc_recv(task_t src, struct message *m) {
     if (src == IPC_ANY) {
         // オープン受信
@@ -193,7 +231,12 @@ error_t ipc_recv(task_t src, struct message *m) {
     return OK;
 }
 
-// メッセージを送信し、その宛先からのメッセージを待つ。
+/** @ingroup user
+ * @brief メッセージを送信し、その宛先からのメッセージを待つ.
+ * @param dst 送信先タスク
+ * @param m 送受信メッセージ
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t ipc_call(task_t dst, struct message *m) {
     error_t err = sys_ipc(dst, dst, m, IPC_CALL);
     if (err != OK) {
@@ -208,12 +251,21 @@ error_t ipc_call(task_t dst, struct message *m) {
     return OK;
 }
 
-// 通知を送信する。
+/** @ingroup user
+ * @brief 通知を送信する.
+ * @param dst 送信先タスク
+ * @param notifications 通知
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t ipc_notify(task_t dst, notifications_t notifications) {
     return sys_notify(dst, notifications);
 }
 
-// サービスを登録する。
+/** @ingroup user
+ * @brief サービスを登録する。
+ * @param name サービス名
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t ipc_register(const char *name) {
     struct message m;
     m.type = SERVICE_REGISTER_MSG;
@@ -221,7 +273,11 @@ error_t ipc_register(const char *name) {
     return ipc_call(VM_SERVER, &m);
 }
 
-// サービス名からタスクIDを検索する。サービスが登録されるまでブロックする。
+/** @ingroup user
+ * @brief サービス名からタスクIDを検索する. サービスが登録されるまでブロックする。
+ * @param name サービス名
+ * @return サービスを提供するタスクID, エラーの場合はエラーコード。
+ */
 task_t ipc_lookup(const char *name) {
     struct message m;
     m.type = SERVICE_LOOKUP_MSG;
