@@ -1,10 +1,14 @@
+/** @file backtrace.c */
 #include <libs/common/print.h>
 #include <libs/common/types.h>
 
-// RISC-Vのスタックフレーム
+/** @ingroup common_reiscv32
+ * @struct stack_frame
+ * @brief RISC-Vのスタックフレーム
+ */
 struct stack_frame {
-    uint32_t fp;  // 呼び出し元のスタックフレーム
-    uint32_t ra;  // 呼び出し元のアドレス
+    uint32_t fp;  /**< 呼び出し元のスタックフレーム */
+    uint32_t ra;  /**< 呼び出し元のアドレス */
 } __packed;
 
 // 現在のスタックフレームのアドレスを取得する。
@@ -14,7 +18,9 @@ static uint32_t read_fp(void) {
     return fp;
 }
 
-/// スタックフレームを辿ってバックトレースを表示する。
+/** @ingroup common_reiscv32
+ * @brief スタックフレームを辿ってバックトレースを表示する.
+ */
 void backtrace(void) {
     uint32_t fp = read_fp();
     if (!fp) {
