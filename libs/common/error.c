@@ -1,7 +1,11 @@
+/** @file error.c */
 #include "types.h"
 #include <libs/common/error.h>
 
-// エラー番号とエラーメッセージの対応表。
+/** @ingroup common
+ * @var error_names
+ * @brief エラー番号とエラーメッセージの対応表
+ */
 static const char *error_names[] = {
     [-OK] = "Success",
     [-ERR_NO_MEMORY] = "No Memory",
@@ -33,7 +37,11 @@ static const char *error_names[] = {
     [-ERR_EOF] = "End of File",
 };
 
-// エラー番号からエラーメッセージを取得する。
+/** @ingroup common
+ * @brief エラー番号からエラーメッセージを取得する
+ * @param err エラー番号
+ * @return エラーメッセージ
+ */
 const char *err2str(int err) {
     if (err < ERR_END || err > 0) {
         return "(Unknown Error)";

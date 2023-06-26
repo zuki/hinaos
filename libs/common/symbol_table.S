@@ -1,3 +1,4 @@
+/** @file symbol_table.S */
 // シンボルテーブルを埋め込むためのメモリ領域
 // tools/embed_symbols.py を使ってビルド時に上書きされる
 .section .symbols

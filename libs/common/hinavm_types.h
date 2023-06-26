@@ -1,58 +1,66 @@
+/** @file hinavm_types.h */
 #pragma once
 #include <libs/common/message.h>
 #include <libs/common/types.h>
 
-// HinaVMの命令セット
-//
-// 引数の意味は以下の通り:
-//
-//   - PC: プログラムカウンタ
-//   - R[A]: レジスタA
-//   - A, B, C: レジスタ番号
-//   - L: ラベル番号
-//   - imm: 即値
-//   - MSG: メッセージバッファ (CURRENT_TASK->m)
-//   - MSG[x:y]: メッセージバッファの [x, y) バイト目
+/** @ingroup common
+ * @enum hinavm_opcode
+ * @brief HinaVMの命令セット.
+ *
+ *
+ * 引数の意味は以下の通り:
+ *
+ *   - PC: プログラムカウンタ
+ *   - R[A]: レジスタA
+ *   - A, B, C: レジスタ番号
+ *   - L: ラベル番号
+ *   - imm: 即値
+ *   - MSG: メッセージバッファ (CURRENT_TASK->m)
+ *   - MSG[x:y]: メッセージバッファの [x, y) バイト目
+ */
 enum hinavm_opcode {
     //
     // 命令           引数     説明
     //
-    HINAVM_ILLEGAL,    //           (無効な命令)
-    HINAVM_NOP,        //           何もしない
-    HINAVM_MOVI,       //  A imm    R[A] = imm
-    HINAVM_MOV,        //  A B      R[A] = R[B]
-    HINAVM_ADD,        //  A B C    R[A] = R[B] + R[C]
-    HINAVM_SUB,        //  A B C    R[A] = R[B] - R[C]
-    HINAVM_MUL,        //  A B C    R[A] = R[B] * R[C]
-    HINAVM_DIV,        //  A B C    R[A] = R[B] / R[C]
-    HINAVM_MOD,        //  A B C    R[A] = R[B] % R[C]
-    HINAVM_SHL,        //  A B C    R[A] = R[B] << R[C]
-    HINAVM_SHR,        //  A B C    R[A] = R[B] >> R[C]
-    HINAVM_AND,        //  A B C    R[A] = R[B] & R[C]
-    HINAVM_OR,         //  A B C    R[A] = R[B] | R[C]
-    HINAVM_XOR,        //  A B C    R[A] = R[B] ^ R[C]
-    HINAVM_EQ,         //  A B C    R[A] = (R[B] == R[C]) ? 1 : 0
-    HINAVM_NE,         //  A B C    R[A] = (R[B] != R[C]) ? 1 : 0
-    HINAVM_LT,         //  A B C    R[A] = (R[B] < R[C])  ? 1 : 0
-    HINAVM_LE,         //  A B C    R[A] = (R[B] <= R[C]) ? 1 : 0
-    HINAVM_LABEL,      //  L        ラベル L の定義
-    HINAVM_JMP,        //  L        PC = L
-    HINAVM_JMP_IF,     //  L A      PC = (R[A] == 0) ? pc + 1 : L
-    HINAVM_LDM8,       //  A imm    R[A] = MSG[imm:imm+1]
-    HINAVM_LDM16,      //  A imm    R[A] = MSG[imm:imm+2]
-    HINAVM_LDM32,      //  A imm    R[A] = MSG[imm:imm+4]
-    HINAVM_STM8,       //  A imm    MSG[imm:imm+1] = R[A]
-    HINAVM_STM16,      //  A imm    MSG[imm:imm+2] = R[A]
-    HINAVM_STM32,      //  A imm    MSG[imm:imm+4] = R[A]
-    HINAVM_SEND,       //  A B      R[A] = ipc_send(dst = R[B], message = M)
-    HINAVM_REPLY,      //  A B      R[A] = ipc_reply(dst = R[B], message = M)
-    HINAVM_RECV,       //  A B      R[A] = ipc_recv(src = R[B], message = M)
-    HINAVM_PRINT,      //  A        R[A] を32ビット符号付き整数として出力する (10進数)
-    HINAVM_PRINT_HEX,  //  A        R[A] を32ビット符号なし整数として出力する (16進数)
-    HINAVM_EXIT,       //           タスクを終了する
+    HINAVM_ILLEGAL,    /**<           (無効な命令) */
+    HINAVM_NOP,        /**<           何もしない */
+    HINAVM_MOVI,       /**<  A imm    R[A] = imm */
+    HINAVM_MOV,        /**<  A B      R[A] = R[B] */
+    HINAVM_ADD,        /**<  A B C    R[A] = R[B] + R[C] */
+    HINAVM_SUB,        /**<  A B C    R[A] = R[B] - R[C] */
+    HINAVM_MUL,        /**<  A B C    R[A] = R[B] * R[C] */
+    HINAVM_DIV,        /**<  A B C    R[A] = R[B] / R[C] */
+    HINAVM_MOD,        /**<  A B C    R[A] = R[B] % R[C] */
+    HINAVM_SHL,        /**<  A B C    R[A] = R[B] << R[C] */
+    HINAVM_SHR,        /**<  A B C    R[A] = R[B] >> R[C] */
+    HINAVM_AND,        /**<  A B C    R[A] = R[B] & R[C] */
+    HINAVM_OR,         /**<  A B C    R[A] = R[B] | R[C] */
+    HINAVM_XOR,        /**<  A B C    R[A] = R[B] ^ R[C] */
+    HINAVM_EQ,         /**<  A B C    R[A] = (R[B] == R[C]) ? 1 : 0 */
+    HINAVM_NE,         /**<  A B C    R[A] = (R[B] != R[C]) ? 1 : 0 */
+    HINAVM_LT,         /**<  A B C    R[A] = (R[B] < R[C])  ? 1 : 0 */
+    HINAVM_LE,         /**<  A B C    R[A] = (R[B] <= R[C]) ? 1 : 0 */
+    HINAVM_LABEL,      /**<  L        ラベル L の定義 */
+    HINAVM_JMP,        /**<  L        PC = L */
+    HINAVM_JMP_IF,     /**<  L A      PC = (R[A] == 0) ? pc + 1 : L */
+    HINAVM_LDM8,       /**<  A imm    R[A] = MSG[imm:imm+1] */
+    HINAVM_LDM16,      /**<  A imm    R[A] = MSG[imm:imm+2] */
+    HINAVM_LDM32,      /**<  A imm    R[A] = MSG[imm:imm+4] */
+    HINAVM_STM8,       /**<  A imm    MSG[imm:imm+1] = R[A] */
+    HINAVM_STM16,      /**<  A imm    MSG[imm:imm+2] = R[A] */
+    HINAVM_STM32,      /**<  A imm    MSG[imm:imm+4] = R[A] */
+    HINAVM_SEND,       /**<  A B      R[A] = ipc_send(dst = R[B], message = M) */
+    HINAVM_REPLY,      /**<  A B      R[A] = ipc_reply(dst = R[B], message = M) */
+    HINAVM_RECV,       /**<  A B      R[A] = ipc_recv(src = R[B], message = M) */
+    HINAVM_PRINT,      /**<  A        R[A] を32ビット符号付き整数として出力する (10進数) */
+    HINAVM_PRINT_HEX,  /**<  A        R[A] を32ビット符号なし整数として出力する (16進数) */
+    HINAVM_EXIT,       /**<           タスクを終了する */
 };
 
-// HinaVMにおける機械語の構造
+/** @ingroup common
+ * @union hinavm_inst
+ * @brief HinaVMにおける機械語の構造
+ */
 union hinavm_inst {
     // 基本的な命令の構造
     struct {
@@ -114,6 +122,9 @@ union hinavm_inst {
     } ipc;
 };
 
+/** @ingroup common
+ * @typedef hinavm_inst_t
+ */
 typedef union hinavm_inst hinavm_inst_t;
 
 STATIC_ASSERT(sizeof(hinavm_inst_t) == sizeof(uint32_t),

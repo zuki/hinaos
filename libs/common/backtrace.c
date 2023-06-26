@@ -1,7 +1,12 @@
+/** @file backtrace.c */
 #include <libs/common/backtrace.h>
 #include <libs/common/print.h>
 
-// シンボルテーブルの中から指定されたアドレスに最も近いシンボルを探す。
+/** @ingroup common
+ * @brief シンボルテーブルの中から指定されたアドレスに最も近いシンボルを探す.
+ * @param addr 対象アドレス
+ * @return シンボル名、見つからなかった場合はNULL
+ */
 struct symbol *find_symbol(vaddr_t addr) {
     ASSERT(__symbol_table.magic == SYMBOL_TABLE_MAGIC);
 

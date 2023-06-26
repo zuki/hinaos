@@ -1,3 +1,4 @@
+/** @file types.h */
 #pragma once
 #include "buildconfig.h"
 

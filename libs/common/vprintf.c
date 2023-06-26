@@ -1,3 +1,4 @@
+/** @file vprintf.c */
 #include <libs/common/vprintf.h>
 
 // 文字列を出力する。
@@ -28,23 +29,32 @@ static void print_uint(uintmax_t n, int base, char pad, int width) {
     puts(&tmp[i + 1]);
 }
 
-//  vprintf関数の実装。printf関数の実装の主要部分。
-//
-//  %%   - %
-//  %c   - 文字
-//  %s   - 文字列
-//  %d   - 符号付き整数 (10進数)
-//  %u   - 符号なし整数 (10進数)
-//  %x   - 符号なし整数 (16進数)
-//  %p   - ポインタ
-//  %pI4 - IPv4アドレス
-//
-//  以下のオプションをサポートする。
-//  l  - long
-//  ll - long long
-//  h  - short
-//  #  - 0x などの接頭辞を付ける
-//  0  - 0埋め
+/** @ingroup common
+ * @brief vprintf関数の実装. printf関数の実装の主要部分。
+ *
+ *  以下のフラグ文字をサポートする。
+ *  ```
+ *  %%   - %
+ *  %c   - 文字
+ *  %s   - 文字列
+ *  %d   - 符号付き整数 (10進数)
+ *  %u   - 符号なし整数 (10進数)
+ *  %x   - 符号なし整数 (16進数)
+ *  %p   - ポインタ
+ *  %pI4 - IPv4アドレス
+ *  ```
+ *
+ *  以下のオプションをサポートする。
+ *  ```
+ *  l  - long
+ *  ll - long long
+ *  h  - short
+ *  #  - 0x などの接頭辞を付ける
+ *  0  - 0埋め
+ *  ```
+ * @param fmt フォーマット文字列
+ * @param vargs 引数リスト
+ */
 void vprintf(const char *fmt, va_list vargs) {
     while (*fmt) {
         if (*fmt != '%') {

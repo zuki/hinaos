@@ -1,3 +1,4 @@
+/** @file message.h */
 #pragma once
 #include "ipcstub.h"
 
@@ -25,11 +26,15 @@ STATIC_ASSERT(NOTIFY_ASYNC_BASE + NUM_TASKS_MAX < sizeof(notifications_t) * 8,
 #define MSG_ID(type) ((type) >> 12)
 #define MSG_LEN(x)   ((x) & (0xfff))
 
+/** @ingroup common
+ * @struct message
+ * @brief メッセージ構造体
+ */
 struct message {
-    int32_t type;         // メッセージの種類 (負の数の場合はエラー値)
-    task_t src;           // メッセージの送信元
+    int32_t type;         /**< メッセージの種類 (負の数の場合はエラー値) */
+    task_t src;           /**< メッセージの送信元 */
     union {
-        uint8_t data[0];  // メッセージデータの先頭を指す
+        uint8_t data[0];  /**< メッセージデータの先頭を指す */
         /// 自動生成される各メッセージのフィールド定義:
         //
         //     struct { int x; int y; } add;

@@ -1,3 +1,4 @@
+/** @file list.c */
 #include <libs/common/list.h>
 #include <libs/common/print.h>
 
@@ -19,28 +20,46 @@ static void list_elem_nullify(list_elem_t *elem) {
     elem->next = NULL;
 }
 
-// リストを初期化する。初期状態ではリストは空。
+/** @ingroup common
+ * @brief リストを初期化する. 初期状態ではリストは空。
+ * @param list 初期化するリストへのポインタ
+ */
 void list_init(list_t *list) {
     list->prev = list;
     list->next = list;
 }
 
-// リストのエントリを初期化する。
+/** @ingroup common
+ * @brief リストのエントリを初期化する.
+ * @param elem 初期化するリストエントリへのポインタ
+ */
 void list_elem_init(list_elem_t *elem) {
     list_elem_nullify(elem);
 }
 
-// リストが空かどうかを返す。
+/** @ingroup common
+ * @brief リストが空かどうかを返す.
+ * @param list リストへのポインタ
+ * @return リストが空であればtrue, そうでなければfalse
+ */
 bool list_is_empty(list_t *list) {
     return list->next == list;
 }
 
-// リストのエントリがどこかのリストに所属しているか (つまり使用中か) を返す。O(1)。
+/** @ingroup common
+ * @brief リストのエントリがどこかのリストに所属しているか (つまり使用中か) を返す。O(1)。
+ * @param elem リストエントリへのポインタ
+ * @return エントリがリストに属していればtrue, そうでなければfalse
+ */
 bool list_is_linked(list_elem_t *elem) {
     return elem->next != NULL;
 }
 
-// リストの総エントリ数を返す。O(n)。
+/** @ingroup common
+ * @brief リストの総エントリ数を返す. O(n)。
+ * @param list リストへのポインタ
+ * @return リストの総エントリ数
+ */
 size_t list_len(list_t *list) {
     size_t len = 0;
     struct list *node = list->next;
@@ -52,7 +71,12 @@ size_t list_len(list_t *list) {
     return len;
 }
 
-// リストに指定されたエントリが含まれているかを返す。O(n)。
+/** @ingroup common
+ * @brief リストに指定されたエントリが含まれているかを返す. O(n)。
+ * @param list リストへのポインタ
+ * @param elem リストエントリへのポインタ
+ * @return リストにエントリが含まれていればtrue, そうでなければfalse
+ */
 bool list_contains(list_t *list, list_elem_t *elem) {
     list_elem_t *node = list->next;
     while (node != list) {
@@ -66,7 +90,10 @@ bool list_contains(list_t *list, list_elem_t *elem) {
     return false;
 }
 
-// リストからエントリを削除する。O(1)。
+/** @ingroup common
+ * @brief リストからエントリを削除する. O(1)。
+ * @param elem リストエントリへのポインタ
+ */
 void list_remove(list_elem_t *elem) {
     if (!list_is_linked(elem)) {
         return;
@@ -83,14 +110,22 @@ void list_remove(list_elem_t *elem) {
     list_elem_nullify(elem);
 }
 
-// エントリをリストの末尾に追加する。O(1)。
+/** @ingroup common
+ * @brief エントリをリストの末尾に追加する. O(1)。
+ * @param list リストへのポインタ
+ * @param new_tail リストエントリへのポインタ
+ */
 void list_push_back(list_t *list, list_elem_t *new_tail) {
     DEBUG_ASSERT(!list_contains(list, new_tail));
     DEBUG_ASSERT(!list_is_linked(new_tail));
     list_insert(list->prev, list, new_tail);
 }
 
-// リストの先頭エントリを取り出す。空の場合はNULLを返す。O(1)。
+/** @ingroup common
+ * @brief リストの先頭エントリを取り出す. O(1)。
+ * @param list リストへのポインタ
+ * @return リストの先頭エントリへのポインタ、空の場合はNULL
+ */
 list_elem_t *list_pop_front(list_t *list) {
     struct list *head = list->next;
     if (head == list) {

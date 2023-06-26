@@ -1,3 +1,4 @@
+/** @file print.h */
 // printf関数のラッパーマクロ。カーネル・ユーザーランド両方で利用できるように定義されている。
 #pragma once
 #include <libs/common/backtrace.h>
@@ -21,41 +22,53 @@ __noreturn void panic_after_hook(void);
 #define SGR_DEBUG "\e[1;95m"  // マゼンタ (紫色) + 太字
 #define SGR_RESET "\e[0m"     // 色をリセット
 
-// トレースメッセージを出力する。printf関数と同じ引数を取る。
+/** @ingroup common
+ * @def TRACE
+ * @brief トレースメッセージを出力する. printf関数と同じ引数を取る。 */
 #define TRACE(fmt, ...)                                                        \
     do {                                                                       \
         printf("[%s] " fmt PRINT_NL, __program_name(), ##__VA_ARGS__);         \
     } while (0)
 
-// デバッグメッセージを出力する。printf関数と同じ引数を取る。
+/** @ingroup common
+ * @def DBG
+ * @brief デバッグメッセージを出力する. printf関数と同じ引数を取る。 */
 #define DBG(fmt, ...)                                                          \
     do {                                                                       \
         printf(SGR_DEBUG "[%s] " fmt SGR_RESET PRINT_NL, __program_name(),     \
                ##__VA_ARGS__);                                                 \
     } while (0)
 
-// メッセージを出力する。printf関数と同じ引数を取る。
+/** @ingroup common
+ * @def INFO
+ * @brief メッセージを出力する. printf関数と同じ引数を取る。 */
 #define INFO(fmt, ...)                                                         \
     do {                                                                       \
         printf(SGR_INFO "[%s] " fmt SGR_RESET PRINT_NL, __program_name(),      \
                ##__VA_ARGS__);                                                 \
     } while (0)
 
-// 警告メッセージを出力する。printf関数と同じ引数を取る。
+/** @ingroup common
+ * @def WARN
+ * @brief 警告メッセージを出力する. printf関数と同じ引数を取る。 */
 #define WARN(fmt, ...)                                                         \
     do {                                                                       \
         printf(SGR_WARN "[%s] WARN: " fmt SGR_RESET PRINT_NL,                  \
                __program_name(), ##__VA_ARGS__);                               \
     } while (0)
 
-// エラーメッセージを出力する。printf関数と同じ引数を取る。
+/** @ingroup common
+ * @def ERROR
+ * @brief エラーメッセージを出力する. printf関数と同じ引数を取る。 */
 #define ERROR(fmt, ...)                                                        \
     do {                                                                       \
         printf(SGR_ERR "[%s] ERROR: " fmt SGR_RESET PRINT_NL,                  \
                __program_name(), ##__VA_ARGS__);                               \
     } while (0)
 
-// バイナリデータを16進数で出力する。ptrはバイト列へのポインタ、lenは表示するバイト数。
+/** @ingroup common
+ * @def HEXDUMP
+ * @brief バイナリデータを16進数で出力する. ptrはバイト列へのポインタ、lenは表示するバイト数。 */
 #define HEXDUMP(ptr, len)                                                      \
     do {                                                                       \
         uint8_t *__ptr = (uint8_t *) (ptr);                                    \
@@ -74,7 +87,9 @@ __noreturn void panic_after_hook(void);
         printf(PRINT_NL);                                                      \
     } while (0)
 
-// アサーション。exprが偽ならエラーメッセージを出力してプログラムを終了する。
+/** @ingroup common
+ * @def ASSERT
+ * @brief アサーション. exprが偽ならエラーメッセージを出力してプログラムを終了する。 */
 #define ASSERT(expr)                                                           \
     do {                                                                       \
         if (!(expr)) {                                                         \
@@ -95,7 +110,9 @@ __noreturn void panic_after_hook(void);
 #    define DEBUG_ASSERT(expr) ((void) (expr))
 #endif
 
-// アサーション。exprがエラー値を返したらエラーメッセージを出力してプログラムを終了する。
+/** @ingroup common
+ * @def ASSERT_OK
+ * @brief アサーション. exprがエラー値を返したらエラーメッセージを出力してプログラムを終了する。 */
 #define ASSERT_OK(expr)                                                        \
     do {                                                                       \
         __typeof__(expr) __expr = (expr);                                      \
@@ -109,7 +126,9 @@ __noreturn void panic_after_hook(void);
         }                                                                      \
     } while (0)
 
-// 警告メッセージをスタックトレース付きで出力する。printf関数と同じ引数を取る。
+/** @ingroup common
+ * @def OOPS
+ * @brief 警告メッセージをスタックトレース付きで出力する. printf関数と同じ引数を取る。 */
 #define OOPS(fmt, ...)                                                         \
     do {                                                                       \
         printf(SGR_WARN "[%s] Oops: " fmt SGR_RESET PRINT_NL,                  \
@@ -117,7 +136,9 @@ __noreturn void panic_after_hook(void);
         backtrace();                                                           \
     } while (0)
 
-// アサーション。exprがエラー値を返したら警告メッセージをスタックトレース付きで出力する。
+/** @ingroup common
+ * @def OOPS_OK
+ * @brief アサーション. exprがエラー値を返したら警告メッセージをスタックトレース付きで出力する。 */
 #define OOPS_OK(expr)                                                          \
     do {                                                                       \
         __typeof__(expr) __expr = (expr);                                      \
@@ -128,7 +149,9 @@ __noreturn void panic_after_hook(void);
         }                                                                      \
     } while (0)
 
-// エラーメッセージを出力してプログラムを終了する。printf関数と同じ引数を取る。
+/** @ingroup common
+ * @def PANIC
+ * @brief エラーメッセージを出力してプログラムを終了する. printf関数と同じ引数を取る。 */
 #define PANIC(fmt, ...)                                                        \
     do {                                                                       \
         panic_before_hook();                                                   \
@@ -139,8 +162,10 @@ __noreturn void panic_after_hook(void);
         __builtin_unreachable();                                               \
     } while (0)
 
-// まだ実装されていないことを示すエラーメッセージを出力してプログラムを終了する。
-// printf関数と同じ引数を取る。
+/** @ingroup common
+ * @def NYI
+ * @brief まだ実装されていないことを示すエラーメッセージを出力して
+ * プログラムを終了する. printf関数と同じ引数を取る。 */
 #define NYI()                                                                  \
     do {                                                                       \
         panic_before_hook();                                                   \
@@ -150,8 +175,10 @@ __noreturn void panic_after_hook(void);
         __builtin_unreachable();                                               \
     } while (0)
 
-// 到達すべきでないコードに辿り着いたことを示すエラーメッセージを出力してプログラムを終了する。
-// printf関数と同じ引数を取る。
+/** @ingroup common
+ * @def UNREACHABLE
+ * @brief 到達すべきでないコードに辿り着いたことを示すエラーメッセージを
+ * 出力してプログラムを終了する. printf関数と同じ引数を取る。 */
 #define UNREACHABLE()                                                          \
     do {                                                                       \
         panic_before_hook();                                                   \

@@ -1,3 +1,4 @@
+/** @file elf.h */
 #pragma once
 #include <libs/common/types.h>
 
@@ -9,7 +10,10 @@
 #define PF_W (1 << 1)        // 書き込み可能領域
 #define PF_X (1 << 0)        // 実行可能領域
 
-// ELFヘッダ (32ビット版)
+/** @ingroup common
+ * @struct elf32_ehdr
+ * @brief ELFヘッダ (32ビット版)
+*/
 struct elf32_ehdr {
     uint8_t e_ident[16];
     uint16_t e_type;
@@ -27,7 +31,10 @@ struct elf32_ehdr {
     uint16_t e_shstrndx;
 } __packed;
 
-// プログラムヘッダ (32ビット版)
+/** @ingroup common
+ * @struct elf32_phdr
+ * @brief プログラムヘッダ (32ビット版)
+*/
 struct elf32_phdr {
     uint32_t p_type;
     uint32_t p_offset;
