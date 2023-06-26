@@ -6,7 +6,7 @@
  * @brief カーネルとユーザランドで使用する共通ライブラリ
  * @ingroup libs
  *
- * @defgroup common_reiscv32 riscv32共通ライブラリ
+ * @defgroup common_riscv32 riscv32共通ライブラリ
  * @brief RISC-V32固有の共通ライブラリ
  * @ingroup common
  *
@@ -14,7 +14,12 @@
  * @brief ユーザランドで使用するライブラリ
  * @ingroup libs
  *
- * @defgroup user_reiscv32 riscv32ユーザランドライブラリ
+ * @defgroup user_riscv32 riscv32ユーザランドライブラリ
  * @brief RISC-V32固有のユーザランドライブラリ
  * @ingroup user
+ *
+ * @defgroup user_vertio vertioユーザランドライブラリ
+ * @brief vertio固有のユーザランドライブラリ
+ * @ingroup user
+ *
  */

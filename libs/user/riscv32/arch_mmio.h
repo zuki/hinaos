@@ -1,3 +1,6 @@
+/** @file arch_mmio.h
+ * @ingroup user_riscv32
+ */
 #pragma once
 #include <libs/common/endian.h>
 #include <libs/common/types.h>

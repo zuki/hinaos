@@ -1,3 +1,6 @@
+/** @file arch_syscall.h
+ * @ingroup user_riscv32
+ */
 #pragma once
 #include <libs/common/types.h>
 
