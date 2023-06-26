@@ -18,8 +18,8 @@
  * @brief RISC-V32固有のユーザランドライブラリ
  * @ingroup user
  *
- * @defgroup user_vertio vertioユーザランドライブラリ
- * @brief vertio固有のユーザランドライブラリ
+ * @defgroup user_virtio virtioユーザランドライブラリ
+ * @brief virtio固有のユーザランドライブラリ
  * @ingroup user
  *
  */

@@ -1,3 +1,4 @@
+/** @file virtio_mmio.c */
 #include <libs/common/endian.h>
 #include <libs/common/print.h>
 #include <libs/common/string.h>
@@ -72,18 +73,31 @@ static void virtq_init(struct virtio_mmio *dev, unsigned index) {
     mmio_write32le(dev->base + VIRTIO_REG_QUEUE_READY, 1);
 }
 
-// index番目のvirtqueueを取得する
+/** @ingroup user_virtio
+ * @brief index番目のvirtqueueを取得する
+ * @param dev デバイス
+ * @param index デバイスのインデックス
+ * @return virtqueueへのポインタ
+ */
 struct virtio_virtq *virtq_get(struct virtio_mmio *dev, unsigned index) {
     DEBUG_ASSERT(index < dev->num_queues);
     return &dev->virtqs[index];
 }
 
-// virtqueueのディスクリプタ数を取得する
+/** @ingroup user_virtio
+ * @brief virtqueueのディスクリプタ数を取得する
+ * @param vq virtqueue
+ * @return ディスクリプタの数
+ */
 uint32_t virtq_num_descs(struct virtio_virtq *vq) {
     return vq->num_descs;
 }
 
-// デバイスにvirtqueueにディスクリプタが追加されたことを通知する
+/** @ingroup user_virtio
+ * @brief デバイスにvirtqueueにディスクリプタが追加されたことを通知する
+ * @param dev デバイス
+ * @param vq virtqueueへのポインタ
+ */
 void virtq_notify(struct virtio_mmio *dev, struct virtio_virtq *vq) {
     // ディスクリプタなどメモリへの書き込みが完了し、デバイス側から書き込みが見えることを保証する
     full_memory_barrier();
@@ -91,11 +105,19 @@ void virtq_notify(struct virtio_mmio *dev, struct virtio_virtq *vq) {
     mmio_write32le(dev->base + VIRTIO_REG_QUEUE_NOTIFY, vq->index);
 }
 
-// ディスクリプタチェーンをavailableリングに追加し、成功すれば先頭ディスクリプタのディスクリプタ
-// テーブル上のインデックスを返す。また、引数chainの各ディスクリプタエントリのdesc_index
-// フィールドにもインデックスが書き込まれる。
-//
-// 注意: 追加したディスクリプタチェーンを処理するためには、virtq_notify関数を呼び出す必要がある。
+/** @ingroup user_virtio
+ * @brief ディスクリプタチェーンをavailableリングに追加する.
+ * 成功すれば先頭ディスクリプタのディスクリプタテーブル上のインデックスを返す。
+ * また、引数chainの各ディスクリプタエントリのdesc_indexフィールドにも
+ * インデックスが書き込まれる。
+ *
+ * 注意: 追加したディスクリプタチェーンを処理するためには、virtq_notify
+ * 関数を呼び出す必要がある。
+ * @param vq virtqueueへのポインタ
+ * @param chain ディスクリプタチェーンへのポインタ
+ * @parma n 追加するディスクリプタの数
+ * @return 先頭ディスクリプタのインデックス
+ */
 int virtq_push(struct virtio_virtq *vq, struct virtio_chain_entry *chain,
                int n) {
     DEBUG_ASSERT(n > 0);
@@ -155,7 +177,7 @@ int virtq_push(struct virtio_virtq *vq, struct virtio_chain_entry *chain,
         }
 
         if (e->device_writable) {
-            desc->flags |= VIRTQ_DESC_F_WRITE;  // デバイスから書き込み専用　
+            desc->flags |= VIRTQ_DESC_F_WRITE;  // デバイスから書き込み専用
         }
 
         desc_index = desc->next;  // 次の空きディスクリプタのインデックス
@@ -170,15 +192,26 @@ int virtq_push(struct virtio_virtq *vq, struct virtio_chain_entry *chain,
     return head_index;
 }
 
-// デバイスドライバが処理すべきディスクリプタチェーンがusedリングにあるかどうかを返す
+/** @ingroup user_virtio
+ * @brief デバイスドライバが処理すべきディスクリプタチェーンがusedリングにあるかどうかを返す
+ * @param vq virtqueueへのポインタ
+ * @return あればtrue, なければfalse
+ */
 bool virtq_is_empty(struct virtio_virtq *vq) {
     return vq->last_used_index == mmio_read16le((uaddr_t) &vq->used->index);
 }
 
-// デバイスが処理したディスクリプタチェーンを取り出す。チェーンに含まれるディスクリプタの数を返し、
-// `chain`に取り出したディスクリプタを格納する。
-//
-// 処理済みのディスクリプタチェーンがない場合は、ERR_EMPTYを返す。
+/** @ingroup user_virtio
+ * @brief デバイスが処理したディスクリプタチェーンを取り出す.
+ * チェーンに含まれるディスクリプタの数を返し、`chain`に取り出した
+ * ディスクリプタを格納する。
+ * @param vq virtqueueへのポインタ
+ * @param chain ディスクリプタチェーンへのポインタ
+ * @param n 取り出すディスクリプタの数
+ * @param total_len ディスクリプタの合計サイズ
+ * @return 取り出したディクリプタの数. 処理済みのディスクリプタチェーンが
+ * ない場合は、ERR_EMPTY
+ */
 int virtq_pop(struct virtio_virtq *vq, struct virtio_chain_entry *chain, int n,
               size_t *total_len) {
     if (virtq_is_empty(vq)) {
@@ -226,22 +259,39 @@ int virtq_pop(struct virtio_virtq *vq, struct virtio_chain_entry *chain, int n,
     return num_popped;
 }
 
-// デバイスコンフィグを1バイト読み込む
+/** @ingroup user_virtio
+ * @brief デバイスコンフィグを1バイト読み込む.
+ * @param dev デバイスへのポインタ
+ * @param offset オフセット
+ * @return デバイスコンフィグレジスタのオフセット位置の1バイト
+ */
 uint8_t virtio_read_device_config8(struct virtio_mmio *dev, offset_t offset) {
     return mmio_read8(dev->base + VIRTIO_REG_DEVICE_CONFIG + offset);
 }
 
-// 割り込みステータスレジスタを読み込む
+/** @ingroup user_virtio
+ * @brief 割り込みステータスレジスタを読み込む
+ * @param dev デバイスへのポインタ
+ * @return 割り込みステータスレジスタの内容
+ */
 uint32_t virtio_read_interrupt_status(struct virtio_mmio *dev) {
     return mmio_read32le(dev->base + VIRTIO_REG_INTERRUPT_STATUS);
 }
 
-// 割り込み処理を完了した旨をデバイスに通知する
+/** @ingroup user_virtio
+ * @brief 割り込み処理を完了した旨をデバイスに通知する
+ * @param dev デバイスへのポインタ
+ * @param status ステータス
+ */
 void virtio_ack_interrupt(struct virtio_mmio *dev, uint32_t status) {
     mmio_write32le(dev->base + VIRTIO_REG_INTERRUPT_ACK, status);
 }
 
-// デバイスが対応してる機能を読み込む
+/** @ingroup user_virtio
+ * @brief デバイスが対応してる機能を読み込む
+ * @param dev デバイスへのポインタ
+ * @return 対応機能を表す64ビット整数
+ */
 uint64_t virtio_read_device_features(struct virtio_mmio *dev) {
     // 下位32ビットを読み込む
     mmio_write32le(dev->base + VIRTIO_REG_DEVICE_FEATURES_SEL, 0);
@@ -253,8 +303,12 @@ uint64_t virtio_read_device_features(struct virtio_mmio *dev) {
     return ((uint64_t) high << 32) | low;
 }
 
-// デバイスに対して引数featuresで指定した機能を有効にする。対応していない機能がある場合は、
-// ERR_NOT_SUPPORTEDを返す。
+/** @ingroup user_virtio
+ * @brief デバイスに対して引数featuresで指定した機能を有効にする。
+ * @param dev デバイスへのポインタ
+ * @param features 機能
+ * @return 成功したらOK, 対応していない機能がある場合は、ERR_NOT_SUPPORTED
+ */
 error_t virtio_negotiate_feature(struct virtio_mmio *dev, uint64_t features) {
     if ((virtio_read_device_features(dev) & features) != features) {
         return ERR_NOT_SUPPORTED;
@@ -273,8 +327,14 @@ error_t virtio_negotiate_feature(struct virtio_mmio *dev, uint64_t features) {
     return OK;
 }
 
-// virtioデバイスを初期化する。この後にvirtio_negotiate_feature関数でデバイスの機能を
-// 有効化し、virtio_enable関数でデバイスを有効化する必要がある。
+/** @ingroup user_virtio
+ * @brief virtioデバイスを初期化する. この後にvirtio_negotiate_feature関数で
+ * デバイスの機能を有効化し、virtio_enable関数でデバイスを有効化する必要がある。
+ * @param dev デバイスへのポインタ
+ * @param base_paddr virtioデバイスのベースアドレスの物理アドレス
+ * @param num_queues virtiqueueの数
+ * @return 成功したらOK, それ以外はエラーコード.
+ */
 error_t virtio_init(struct virtio_mmio *dev, paddr_t base_paddr,
                     unsigned num_queues) {
     error_t err = driver_map_pages(base_paddr, PAGE_SIZE,
@@ -303,7 +363,11 @@ error_t virtio_init(struct virtio_mmio *dev, paddr_t base_paddr,
     return OK;
 }
 
-// virtioデバイスを有効にする
+/** @ingroup user_virtio
+ * @brief virtioデバイスを有効にする.
+ * @param dev デバイスへのポインタ
+ * @return OK
+ */
 error_t virtio_enable(struct virtio_mmio *dev) {
     write_device_status(dev, read_device_status(dev) | VIRTIO_STATUS_DRIVER_OK);
     return OK;

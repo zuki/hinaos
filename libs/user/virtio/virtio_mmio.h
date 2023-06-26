@@ -1,3 +1,6 @@
+/** @file vertio_mmio.h
+ * @ingroup user_virtio
+ */
 // MMIOベースのVirtioデバイスドライバライブラリ
 // https://docs.oasis-open.org/virtio/virtio/v1.2/csd01/virtio-v1.2-csd01.html#x1-1650002
 #pragma once
@@ -32,11 +35,14 @@
 // usedリングにデバイスが処理したディスクリプタが追加されていることを意味する。
 #define VIRTIO_ISR_STATUS_QUEUE (1 << 0)
 
-// MMIOベースのvirtioデバイスを管理する構造体
+/** @ingroup user_virtio
+ * @struct virtio_mmio
+ * @brief MMIOベースのvirtioデバイスを管理する構造体
+*/
 struct virtio_mmio {
-    uaddr_t base;
-    unsigned num_queues;
-    struct virtio_virtq *virtqs;
+    uaddr_t base;                   /**< ベースアドレス */
+    unsigned num_queues;            /**< virtqueueキューの数 */
+    struct virtio_virtq *virtqs;    /**< virtqueueの管理構造体 */
 };
 
 error_t virtio_init(struct virtio_mmio *dev, paddr_t base_paddr,
