@@ -1,10 +1,18 @@
+/** @file page_fault.c */
 #include "page_fault.h"
 #include "bootfs.h"
 #include "task.h"
 #include <libs/common/print.h>
 #include <libs/user/syscall.h>
 
-// ページフォルト処理。ページを用意してマップする。できなかった場合はエラーを返す。
+/** @ingroup vm
+ * @brief ページフォルト処理. ページを用意してマップする。できなかった場合はエラーを返す。
+ * @param task タスク
+ * @param uaddr フォルトを起こした仮想アドレス
+ * @param ip フォルト時のip
+ * @param fault フォルト理由
+ * @return 成功したらOK, エラーが発生したらエラーコード。
+ */
 error_t handle_page_fault(struct task *task, uaddr_t uaddr, uaddr_t ip,
                           unsigned fault) {
     if (uaddr < PAGE_SIZE) {

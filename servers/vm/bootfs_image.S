@@ -1,3 +1,4 @@
+/** @file bootfs_image.S */
 // BootFSを埋め込むためのファイル
 .section .rodata
 .global __bootfs

@@ -1,19 +1,24 @@
+/** @file bootfs.h */
 #pragma once
 #include <libs/common/types.h>
 
-// BootFSファイルシステムヘッダ
+/** @ingroup vm
+ * @struct bootfs_header
+ * @brief BootFSファイルシステムヘッダ */
 struct bootfs_header {
-    uint16_t version;
-    uint16_t header_size;
-    uint16_t num_files;
-    uint16_t padding;
+    uint16_t version;           /**< バージョン */
+    uint16_t header_size;       /**< ヘッダーサイズ */
+    uint16_t num_files;         /**< ファイル数 */
+    uint16_t padding;           /**< パディング */
 } __packed;
 
-// BootFSファイルエントリ
+/** @ingroup vm
+ * @struct bootfs_file
+ * @brief BootFSファイルエントリ */
 struct bootfs_file {
-    char name[56];
-    uint32_t offset;
-    uint32_t len;
+    char name[56];              /**< ファイル名 */
+    uint32_t offset;            /**< オフセット */
+    uint32_t len;               /**< ファイル長 */
 } __packed;
 
 struct bootfs_file *bootfs_open(const char *path);

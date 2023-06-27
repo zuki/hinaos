@@ -1,3 +1,4 @@
+/** @file task.c */
 #include "task.h"
 #include "bootfs.h"
 #include <libs/common/elf.h>
@@ -8,10 +9,20 @@
 #include <libs/user/syscall.h>
 #include <libs/user/task.h>
 
-static struct task *tasks[NUM_TASKS_MAX];      // タスク管理構造体
-static list_t services = LIST_INIT(services);  // サービス管理構造体のリスト
+/** @ingroup vm
+ * @var tasks
+ * @brief タスク管理構造体配列 */
+static struct task *tasks[NUM_TASKS_MAX];
+/** @ingroup vm
+ * @var services
+ * @brief サービス管理構造体のリスト */
+static list_t services = LIST_INIT(services);
 
-// タスクIDからタスク管理構造体を取得する。
+/** @ingroup vm
+ * @brief タスクIDからタスク管理構造体を取得する.
+ * @param tid タスクID
+ * @return タスク管理構造体へのポインタ
+ */
 struct task *task_find(task_t tid) {
     if (tid <= 0 || tid > NUM_TASKS_MAX) {
         PANIC("invalid tid %d", tid);
@@ -20,7 +31,11 @@ struct task *task_find(task_t tid) {
     return tasks[tid - 1];
 }
 
-// 指定されたELFファイルからタスクを生成する。成功するとタスクID、失敗するとエラーを返す。
+/** @ingroup vm
+ * @brief 指定されたELFファイルからタスクを生成する.
+ * @param file BootFSファイル構造体へのポインタ
+ * @return 成功するとタスクID、失敗するとエラーを返す。
+ */
 task_t task_spawn(struct bootfs_file *file) {
     TRACE("launching %s...", file->name);
     struct task *task = malloc(sizeof(*task));
@@ -90,7 +105,7 @@ task_t task_spawn(struct bootfs_file *file) {
     ASSERT(VALLOC_BASE <= valloc_next && valloc_next < VALLOC_END);
     task->valloc_next = valloc_next;
 
-    // ELFセグメントを仮想アドレス空間にマップする。
+    // TOFO: ELFセグメントを仮想アドレス空間にマップする。
     strcpy_safe(task->name, sizeof(task->name), file->name);
 
     // タスク管理構造体をタスクIDテーブルに登録する。
@@ -98,7 +113,10 @@ task_t task_spawn(struct bootfs_file *file) {
     return task->tid;
 }
 
-// タスクを終了させる。
+/** @ingroup vm
+ * @brief タスクを終了させる.
+ * @param task タスク構造体へのポインタ
+ */
 void task_destroy(struct task *task) {
     for (int i = 0; i < NUM_TASKS_MAX; i++) {
         // タスクの終了を監視しているタスクたちに通知する。
@@ -120,7 +138,10 @@ void task_destroy(struct task *task) {
     tasks[task_self() - 1] = NULL;
 }
 
-// タスクIDを指定してタスクを終了させる。
+/** @ingroup vm
+ * @brief タスクIDを指定してタスクを終了させる.
+ * @param tid タスクID
+ */
 error_t task_destroy_by_tid(task_t tid) {
     for (int i = 0; i < NUM_TASKS_MAX; i++) {
         struct task *task = tasks[i];
@@ -133,7 +154,11 @@ error_t task_destroy_by_tid(task_t tid) {
     return ERR_NOT_FOUND;
 }
 
-// サービスを登録する。
+/** @ingroup vm
+ * @brief サービスを登録する.
+ * @param task タスク構造体へのポインタ
+ * @param name サービス名
+ */
 void service_register(struct task *task, const char *name) {
     // サービスを登録する。
     struct service *service = malloc(sizeof(*service));
@@ -158,8 +183,12 @@ void service_register(struct task *task, const char *name) {
     }
 }
 
-// サービス名に対応するタスクIDを返す。まだサービスが登録されていない場合は、ERR_WOULD_BLOCK
-// を返す。
+/** @ingroup vm
+ * @brief サービス名に対応するタスクIDを返す.
+ * @param task タスク構造体へのポインタ
+ * @param name サービス名
+ * @return タスクID, まだサービスが登録されていない場合は、ERR_WOULD_BLOCK
+ */
 task_t service_lookup_or_wait(struct task *task, const char *name) {
     LIST_FOR_EACH (s, &services, struct service, next) {
         if (!strcmp(s->name, name)) {
@@ -168,11 +197,14 @@ task_t service_lookup_or_wait(struct task *task, const char *name) {
     }
 
     TRACE("%s: waiting for service \"%s\"", task->name, name);
+    // waiting_forに登録
     strcpy_safe(task->waiting_for, sizeof(task->waiting_for), name);
     return ERR_WOULD_BLOCK;
 }
 
-// 未だにサービスを待っているタスクがいたら警告を出す。
+/** @ingroup vm
+ * @brief 未だにサービスを待っているタスクがいたら警告を出す.
+ */
 void service_dump(void) {
     for (int i = 0; i < NUM_TASKS_MAX; i++) {
         struct task *task = tasks[i];

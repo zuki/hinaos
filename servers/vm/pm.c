@@ -1,3 +1,4 @@
+/** @file pm.c */
 #include "pm.h"
 #include "task.h"
 #include <libs/common/print.h>
@@ -14,7 +15,15 @@ static uaddr_t valloc(struct task *task, size_t size) {
     return uaddr;
 }
 
-// 物理アドレスをタスクのページテーブルにマップする。uaddrには割り当てた仮想アドレスが返る。
+/** @ingroup vm
+ * @brief 物理アドレスをタスクのページテーブルにマップする. uaddrには割り当てた仮想アドレスが返る。
+ * @param task タスク
+ * @param size マップするサイズ
+ * @param map_flags マップフラグ
+ * @param paddr マップする物理アドレス
+ * @param uaddr マップされた仮想アドレス
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t map_pages(struct task *task, size_t size, int map_flags, paddr_t paddr,
                   uaddr_t *uaddr) {
     DEBUG_ASSERT(IS_ALIGNED(size, PAGE_SIZE));

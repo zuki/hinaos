@@ -1,3 +1,4 @@
+/** @file task.h */
 #pragma once
 #include <libs/common/elf.h>
 #include <libs/common/list.h>
@@ -10,26 +11,33 @@
 // 動的に割り当てられる仮想アドレスの終了アドレス
 #define VALLOC_END 0x40000000
 
-// サービス管理構造体。サービス名とタスクIDの対応を保持し、サービスディスカバリに使われる。
+/** @ingroup vm
+ * @struct service
+ * @brief サービス管理構造体。サービス名とタスクIDの対応を保持し、サービスディスカバリに使われる。
+ */
 struct service {
-    list_elem_t next;
-    char name[SERVICE_NAME_LEN];  // サービス名
-    task_t task;                  // タスクID
+    list_elem_t next;               /**< リストの次の要素 */
+    char name[SERVICE_NAME_LEN];    /**< サービス名 */
+    task_t task;                    /**< タスクID */
 };
 
-// タスク管理構造体
+
 struct bootfs_file;
+/** @ingroup vm
+ * @struct task
+ * @brief タスク管理構造体
+ */
 struct task {
-    task_t tid;                          // タスクID
-    task_t pager;                        // ページャタスクID
-    char name[TASK_NAME_LEN];            // タスク名
-    void *file_header;                   // ELFファイルの先頭を指す
-    struct bootfs_file *file;            // BootFS上のELFファイル
-    elf_ehdr_t *ehdr;                    // ELFヘッダ
-    elf_phdr_t *phdrs;                   // プログラムヘッダ
-    uaddr_t valloc_next;                 // 動的に割り当てられる仮想アドレスの次のアドレス
-    char waiting_for[SERVICE_NAME_LEN];  // サービス登録待ちのサービス名
-    bool watch_tasks;                    // タスクの終了を監視するかどうか
+    task_t tid;                          /**< タスクID */
+    task_t pager;                        /**< ページャタスクID */
+    char name[TASK_NAME_LEN];            /**< タスク名 */
+    void *file_header;                   /**< ELFファイルの先頭を指す */
+    struct bootfs_file *file;            /**< BootFS上のELFファイル */
+    elf_ehdr_t *ehdr;                    /**< ELFヘッダ */
+    elf_phdr_t *phdrs;                   /**< プログラムヘッダ */
+    uaddr_t valloc_next;                 /**< 動的に割り当てられる仮想アドレスの次のアドレス */
+    char waiting_for[SERVICE_NAME_LEN];  /**< サービス登録待ちのサービス名 */
+    bool watch_tasks;                    /**< タスクの終了を監視するかどうか */
 };
 
 struct task *task_find(task_t tid);

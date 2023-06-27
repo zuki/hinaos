@@ -1,3 +1,4 @@
+/** @file main.c */
 #include "bootfs.h"
 #include "page_fault.h"
 #include "pm.h"
@@ -45,6 +46,9 @@ static void spawn_servers(void) {
     }
 }
 
+/** @ingroup vm
+ * @brief vmサーバのmain関数
+ */
 void main(void) {
     bootfs_init();
     spawn_servers();
