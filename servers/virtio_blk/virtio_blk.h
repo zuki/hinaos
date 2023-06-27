@@ -1,3 +1,4 @@
+/** @file virtio_blk */
 #pragma once
 #include <libs/common/list.h>
 #include <libs/common/message.h>
@@ -20,11 +21,14 @@
 STATIC_ASSERT(IS_ALIGNED(REQUEST_BUFFER_SIZE, SECTOR_SIZE),
               "virtio-blk buffer size must be aligned to the sector size");
 
-// virtio-blkへの読み書き要求
+/** @ingroup virtio_blk
+ * @struct virtio_blk_req
+ * @brief virtio-blkへの読み書き要求
+ */
 struct virtio_blk_req {
-    uint32_t type;                      // VIRTIO_BLK_T_IN または VIRTIO_BLK_T_OUT
-    uint32_t reserved;                  // 予約済み
-    uint64_t sector;                    // 読み書きするセクタ番号
-    uint8_t data[REQUEST_BUFFER_SIZE];  // 読み書きするデータ
-    uint8_t status;                     // 処理結果。成功ならばVIRTIO_BLK_S_OK。
+    uint32_t type;                      /**< VIRTIO_BLK_T_IN または VIRTIO_BLK_T_OUT */
+    uint32_t reserved;                  /**< 予約済み */
+    uint64_t sector;                    /**< 読み書きするセクタ番号 */
+    uint8_t data[REQUEST_BUFFER_SIZE];  /**< 読み書きするデータ */
+    uint8_t status;                     /**< 処理結果。成功ならばVIRTIO_BLK_S_OK。 */
 } __packed;

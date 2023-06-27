@@ -1,3 +1,4 @@
+/** @file main.c */
 #include "virtio_blk.h"
 #include <libs/common/print.h>
 #include <libs/common/string.h>
@@ -7,9 +8,18 @@
 #include <libs/user/syscall.h>
 #include <libs/user/virtio/virtio_mmio.h>
 
-static struct virtio_mmio device;      // virtioデバイスの管理構造体
-static struct virtio_virtq *requestq;  // 読み書き処理要求用virtqueue
-static dmabuf_t dmabuf;                // 読み書き処理要求用virtqueueで使われるバッファ
+/** @ingroup virtio_blk
+ * @var device
+ * @brief virtioデバイスの管理構造体 */
+static struct virtio_mmio device;
+/** @ingroup virtio_blk
+ * @var requestq
+ * @brief 読み書き処理要求用virtqueue */
+static struct virtio_virtq *requestq;
+/** @ingroup virtio_blk
+ * @var dmabuf
+ * @brief 読み書き処理要求用virtqueueで使われるバッファ */
+static dmabuf_t dmabuf;
 
 // ディスクの読み書き
 static error_t read_write(task_t task, uint64_t sector, void *buf, size_t len,
@@ -40,16 +50,16 @@ static error_t read_write(task_t task, uint64_t sector, void *buf, size_t len,
         memcpy(req->data, buf, len);
     }
 
-    // ディスクリプタチェーン[0]: type, reserved, sector (デバイスからは読み込み専用)
+    // ディスクリプタチェーン[0]: req->type, reserved, sector (デバイスからは読み込み専用)
     struct virtio_chain_entry chain[3];
     chain[0].addr = paddr;
     chain[0].len = sizeof(uint32_t) * 2 + sizeof(uint64_t);
     chain[0].device_writable = false;
-    // ディスクリプタチェーン[1]: 書き込み元/読み込み先バッファ
+    // ディスクリプタチェーン[1]: req->data: 書き込み元/読み込み先バッファ
     chain[1].addr = paddr + offsetof(struct virtio_blk_req, data);
     chain[1].len = len;
     chain[1].device_writable = !is_write;
-    // ディスクリプタチェーン[2]: 処理結果用メモリ領域。デバイスが書き込む。
+    // ディスクリプタチェーン[2]: req->status: 処理結果用メモリ領域。デバイスが書き込む。
     chain[2].addr = paddr + offsetof(struct virtio_blk_req, status);
     chain[2].len = sizeof(uint8_t);
     chain[2].device_writable = true;
@@ -115,6 +125,9 @@ static void init_device(void) {
     dmabuf = dmabuf_create(sizeof(struct virtio_blk_req), NUM_REQUEST_BUFFERS);
 }
 
+/** @ingroup virtio_blk
+ * @brief virtio_blkのmain関数
+ */
 void main(void) {
     // virtio-blkデバイスを初期化する
     init_device();
