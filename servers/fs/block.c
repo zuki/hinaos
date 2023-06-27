@@ -1,3 +1,4 @@
+/** @file block.c */
 #include "block.h"
 #include "fs.h"
 #include <libs/common/print.h>
@@ -6,11 +7,17 @@
 #include <libs/user/malloc.h>
 #include <servers/virtio_blk/virtio_blk.h>  // SECTOR_SIZE
 
-// ブロックデバイスドライバサーバのタスクID。
+/** @ingroup fs
+ * @var blk_server
+ * @brief ブロックデバイスドライバサーバのタスクID */
 static task_t blk_server;
-// キャッシュされたブロックのリスト。
+/** @ingroup fs
+ * @var cached_blocks
+ * @brief キャッシュされたブロックのリスト */
 static list_t cached_blocks = LIST_INIT(cached_blocks);
-// 変更済みブロックのリスト。ディスクに書き戻す必要がある。
+/** @ingroup fs
+ * @var dirty_blocks
+ * @brief 変更済みブロックのリスト. ディスクに書き戻す必要がある。 */
 static list_t dirty_blocks = LIST_INIT(dirty_blocks);
 
 // ブロック番号をセクタ番号に変換する。
@@ -40,7 +47,12 @@ static void block_write(struct block *block) {
     }
 }
 
-// ブロックをブロックキャッシュに読み込む。
+/** @ingroup fs
+ * @brief ブロックをブロックキャッシュに読み込む
+ * @param index ブロックインデックス
+ * @param block ブロック構造体へのポインタのポインタ
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t block_read(block_t index, struct block **block) {
     if (index == 0xffff) {
         OOPS("invalid block index: %x", index);
@@ -99,14 +111,19 @@ error_t block_read(block_t index, struct block **block) {
     return OK;
 }
 
-// ブロックを変更済みにする。
+/** @ingroup fs
+ * @brief ブロックを変更済みにする
+ * @param block ブロック構造体へのポインタ
+ */
 void block_mark_as_dirty(struct block *block) {
     if (!block_is_dirty(block)) {
         list_push_back(&dirty_blocks, &block->dirty_next);
     }
 }
 
-// 変更済みブロックをすべてディスクに書き込む。
+/** @ingroup fs
+ * @brief 変更済みブロックをすべてディスクに書き込む
+ */
 void block_flush_all(void) {
     LIST_FOR_EACH (b, &dirty_blocks, struct block, dirty_next) {
         block_write(b);
@@ -114,7 +131,9 @@ void block_flush_all(void) {
     }
 }
 
-// ブロックキャッシュレイヤの初期化。
+/** @ingroup fs
+ * @brief ブロックキャッシュレイヤの初期化
+ */
 void block_init(void) {
     // デバイスドライバサーバのタスクIDを取得する。
     blk_server = ipc_lookup("blk_device");

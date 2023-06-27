@@ -1,12 +1,19 @@
+/** @file fs.c */
 #include "fs.h"
 #include "block.h"
 #include <libs/common/print.h>
 #include <libs/common/string.h>
 #include <libs/user/malloc.h>
 
-// 空きブロックを管理するビットマップブロックに対応するブロックキャッシュ
+/** @ingroup fs
+ * @var bitmap_blocks
+ * @brief 空きブロックを管理するビットマップブロックに対応するブロックキャッシュ
+*/
 static struct block *bitmap_blocks[NUM_BITMAP_BLOCKS];
-// ルートディレクトリのブロックキャッシュ
+/** @ingroup fs
+ * @var root_dir_block
+ * @brief ルートディレクトリのブロックキャッシュ
+ */
 static struct block *root_dir_block;
 
 // 未使用のブロック番号を割り当て、ビットマップブロックに使用中であることを記録する。
@@ -205,7 +212,11 @@ static error_t readwrite(struct block *entry_block, void *buf, size_t size,
     return OK;
 }
 
-// ファイルまたはディレクトリの削除。
+/** @ingroup fs
+ * @brief ファイルまたはディレクトリの削除
+ * @param path ファイルまたはディレクトリのパス
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t fs_delete(const char *path) {
     // 親ディレクトリを開く
     struct block *dir_block;
@@ -282,7 +293,12 @@ static const char *basename(const char *path) {
     }
 }
 
-// ファイルまたはディレクトリの作成。
+/** @ingroup fs
+ * @brief ファイルまたはディレクトリの作成
+ * @param path ファイルまたはディレクトリのパス
+ * @param type パスの種別
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t fs_create(const char *path, uint8_t type) {
     const char *name = basename(path);
     // ファイル名が長すぎないかチェックする
@@ -361,13 +377,27 @@ error_t fs_find(const char *path, struct block **entry_block) {
     return lookup(path, false, entry_block);
 }
 
-// ファイルの読み書き。
+/** @ingroup fs
+ * @brief ファイルの読み書き
+ * @param entry_block ブロックエントリ
+ * @param buf 読み書き用のバッファ
+ * @param size 読み書きサイズ
+ * @param ofsset オフセット
+ * @param write 書き込みであるか
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t fs_readwrite(struct block *entry_block, void *buf, size_t size,
                      size_t offset, bool write) {
     return readwrite(entry_block, buf, size, offset, write);
 }
 
-// ディレクトリのindex番目エントリをひとつ取得する。
+/** @ingroup fs
+ * @brief ディレクトリのindex番目エントリをひとつ取得する
+ * @param path ディレクトリパス名
+ * @param index 取得するエントリのインデックス
+ * @param entry エントリのへのポインタのポインタ
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t fs_readdir(const char *path, int index, struct hinafs_entry **entry) {
     // ディレクトリのブロックを読み込む
     struct block *dir_block;
@@ -400,7 +430,9 @@ error_t fs_readdir(const char *path, int index, struct hinafs_entry **entry) {
     return OK;
 }
 
-// ファイルシステムレイヤを初期化する。
+/** @ingroup fs
+ * @brief ファイルシステムレイヤを初期化する
+ */
 void fs_init(void) {
     // ファイルシステムのヘッダを読み込む
     struct block *header_block;

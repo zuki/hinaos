@@ -1,3 +1,4 @@
+/** @file block.h */
 #pragma once
 
 #include <libs/common/list.h>
@@ -9,16 +10,19 @@
 // ブロック番号
 typedef uint16_t block_t;
 
-// ブロックキャッシュ
-//
-// ストレージデバイスの内容を読み書きする際には、まずデバイスからBLOCK_SIZE分のデータを一気に
-// 読み出してブロックキャッシュとして追加し、ファイルシステム実装はメモリ上にあるキャッシュデータ
-// を読み書きする。
+/** @ingroup fs
+ * @struct block
+ * @brief ブロックキャッシュ
+ *
+ * ストレージデバイスの内容を読み書きする際には、まずデバイスからBLOCK_SIZE分の
+ * データを一気に読み出してブロックキャッシュとして追加し、ファイルシステム実装は
+ * メモリ上にあるキャッシュデータを読み書きする。
+ */
 struct block {
-    block_t index;             // ディスク上のブロック番号
-    list_elem_t cache_next;    // ブロックキャッシュのリストの要素
-    list_elem_t dirty_next;    // 変更済みブロックキャッシュのリストの要素
-    uint8_t data[BLOCK_SIZE];  // ブロックの内容
+    block_t index;             /**< ディスク上のブロック番号 */
+    list_elem_t cache_next;    /**< ブロックキャッシュのリストの要素 */
+    list_elem_t dirty_next;    /**< 変更済みブロックキャッシュのリストの要素 */
+    uint8_t data[BLOCK_SIZE];  /**< ブロックの内容 */
 };
 
 error_t block_read(block_t index, struct block **block);

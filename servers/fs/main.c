@@ -1,3 +1,4 @@
+/** @file main.c */
 #include "main.h"
 #include "block.h"
 #include "fs.h"
@@ -5,11 +6,16 @@
 #include <libs/common/string.h>
 #include <libs/user/ipc.h>
 
-// 開いているファイルの一覧。インデックスがファイルディスクリプタとして使われる。
-// 全タスクで共有される。
+/** @ingroup fs
+ * @var open_files
+ * @brief 開いているファイルの一覧.
+ * インデックスがファイルディスクリプタとして使われる。
+ * 全タスクで共有される。 */
 static struct open_file open_files[OPEN_FILES_MAX];
 
 // ファイルディスクリプタを割り当てる。
+//   @return ファイルディスクリプタ (index + 1),
+//   空きディクリプタがない場合は0
 static int alloc_fd(void) {
     for (int i = 0; i < OPEN_FILES_MAX; i++) {
         if (!open_files[i].used) {
@@ -106,6 +112,9 @@ static int do_readwrite(task_t task, int fd, void *buf, size_t len,
     return len;
 }
 
+/** @ingroup fs
+ * @brief fsのmain関数
+ */
 void main(void) {
     // 各コンポーネントの初期化
     block_init();
