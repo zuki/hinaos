@@ -1,4 +1,4 @@
-/** @file virtio_blk */
+/** @file virtio_blk.h */
 #pragma once
 #include <libs/common/list.h>
 #include <libs/common/message.h>

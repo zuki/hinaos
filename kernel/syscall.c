@@ -328,6 +328,7 @@ __noreturn static int sys_shutdown(void) {
  * @param a1 引数1
  * @param a2 引数2
  * @param a3 引数3
+ * @param a4 引数4
  * @param n システムコール番号
  * @return 成功したらOK, エラーが発生した場合はエラーコード
  */

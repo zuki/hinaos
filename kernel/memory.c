@@ -287,7 +287,7 @@ void handle_page_fault(vaddr_t vaddr, vaddr_t ip, unsigned fault) {
     }
 }
 
-/** @group kernel
+/** @ingroup kernel
  * @brief メモリ管理システムの初期化.
  * @param bootinfo bootinfoへのポインタ
  */

@@ -1,4 +1,4 @@
-/** @file dsn.c */
+/** @file dns.c */
 //
 // DNSクライアント
 //

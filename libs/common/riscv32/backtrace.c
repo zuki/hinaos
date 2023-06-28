@@ -2,10 +2,9 @@
 #include <libs/common/print.h>
 #include <libs/common/types.h>
 
-/** @ingroup common_reiscv32
+/** @ingroup common_riscv32
  * @struct stack_frame
- * @brief RISC-Vのスタックフレーム
- */
+ * @brief RISC-Vのスタックフレーム */
 struct stack_frame {
     uint32_t fp;  /**< 呼び出し元のスタックフレーム */
     uint32_t ra;  /**< 呼び出し元のアドレス */
@@ -18,7 +17,7 @@ static uint32_t read_fp(void) {
     return fp;
 }
 
-/** @ingroup common_reiscv32
+/** @ingroup common_riscv32
  * @brief スタックフレームを辿ってバックトレースを表示する.
  */
 void backtrace(void) {

@@ -91,7 +91,7 @@ void arch_task_switch(struct task *prev, struct task *next) {
  * @brief タスクを初期化する.
  * @param task タスク管理構造体へのポインタ
  * @param ip ユーザランドの実行アドレス
- * @param kernel_entory カーネルのエントリポインタ
+ * @param kernel_entry カーネルのエントリポインタ
  * @param arg 引数へのポインタ
  * @return 成功したらOK, エラーが発生したらエラーコード
  */

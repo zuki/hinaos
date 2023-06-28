@@ -1,4 +1,4 @@
-/** @file dhs.h */
+/** @file dns.h */
 #pragma once
 #include "ipv4.h"
 #include <libs/common/list.h>

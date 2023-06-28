@@ -42,7 +42,7 @@ void *memset(void *dst, int ch, size_t len) {
 /** @ingroup common
  * @brief メモリ領域をコピーする.
  * @param dst コピー先アドレス
- * @param p2 コピー元アドレス
+ * @param src コピー元アドレス
  * @param len 長さ
  * @return メモリ領域の先頭アドレス
  */
@@ -63,7 +63,7 @@ void *memcpy(void *dst, const void *src, size_t len) {
 /** @ingroup common
  * @brief メモリ領域をコピーする. 重なりがあっても正しく動作する。
  * @param dst コピー先アドレス
- * @param p2 コピー元アドレス
+ * @param src コピー元アドレス
  * @param len 長さ
  * @return メモリ領域の先頭アドレス
  */

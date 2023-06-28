@@ -382,7 +382,7 @@ error_t fs_find(const char *path, struct block **entry_block) {
  * @param entry_block ブロックエントリ
  * @param buf 読み書き用のバッファ
  * @param size 読み書きサイズ
- * @param ofsset オフセット
+ * @param offset オフセット
  * @param write 書き込みであるか
  * @return 成功したらOK, そうでなければエラーコード
  */

@@ -1,4 +1,4 @@
-/** @file print.c */
+/** @file printf.c */
 #include <libs/common/string.h>
 #include <libs/common/vprintf.h>
 #include <libs/user/syscall.h>

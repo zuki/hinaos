@@ -1,4 +1,4 @@
-/** @file vertio_mmio.h
+/** @file virtio_mmio.h
  * @ingroup user_virtio
  */
 // MMIOベースのVirtioデバイスドライバライブラリ

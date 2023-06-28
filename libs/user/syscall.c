@@ -30,7 +30,7 @@ error_t sys_notify(task_t dst, notifications_t notifications) {
  * @brief task_createシステムコール: タスクの生成
  * @param name タスク名
  * @param ip 実行アドレス
- * @param papger ページャタスク
+ * @param pager ページャタスク
  * @return タスクID
  */
 task_t sys_task_create(const char *name, vaddr_t ip, task_t pager) {
@@ -42,7 +42,7 @@ task_t sys_task_create(const char *name, vaddr_t ip, task_t pager) {
  * @param name タスク名
  * @param insts 命令配列
  * @param num_insts 命令数
- * @param papger ページャタスク
+ * @param pager ページャタスク
  * @return タスクID
  */
 task_t sys_hinavm(const char *name, hinavm_inst_t *insts, size_t num_insts,
@@ -78,7 +78,7 @@ task_t sys_task_self(void) {
 
 /** @ingroup user
  * @brief pm_allocシステムコール: 物理メモリの割り当て
- * @param task_id タスクID
+ * @param tid タスクID
  * @param size メモリサイズ
  * @param flags フラグ
  * @return 物理ページ番号

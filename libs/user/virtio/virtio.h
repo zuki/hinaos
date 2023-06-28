@@ -1,4 +1,4 @@
-/** @file vertio.h
+/** @file virtio.h
  * @ingroup user_virtio
  */
 // Virtioデバイスドライバライブラリ

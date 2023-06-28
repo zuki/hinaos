@@ -14,7 +14,7 @@
 #define VIRTIO_NET_QUEUE_RX    0
 #define VIRTIO_NET_QUEUE_TX    1
 
-/** @ingropu virtio_net
+/** @ingroup virtio_net
  * @struct virtio_net_config
  * @brief デバイス固有のコンフィグ領域 (MMIO)
  */
@@ -26,7 +26,7 @@ struct virtio_net_config {
 } __packed;
 
 #define VIRTIO_NET_HDR_GSO_NONE 0
-/** @ingropu virtio_net
+/** @ingroup virtio_net
  * @struct virtio_net_header
  * @brief 処理要求のヘッダ
  */
@@ -39,7 +39,7 @@ struct virtio_net_header {
     uint16_t checksum_offset;       /**< チェックサムお布施と */
 } __packed;
 
-/** @ingropu virtio_net
+/** @ingroup virtio_net
  * @struct virtio_net_req
  * @brief virtio-netデバイスへの処理要求
  */

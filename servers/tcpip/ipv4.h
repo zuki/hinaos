@@ -31,7 +31,7 @@ typedef uint16_t port_t;
 /** @ingroup tcpip
  * @typedef endpoint_t
  * @brief IPv4アドレスとポート番号のペア */
-typedef struct {
+typedef struct endpoint {
     ipv4addr_t addr;
     port_t port;
 } endpoint_t;

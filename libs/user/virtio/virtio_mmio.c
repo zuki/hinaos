@@ -115,7 +115,7 @@ void virtq_notify(struct virtio_mmio *dev, struct virtio_virtq *vq) {
  * 関数を呼び出す必要がある。
  * @param vq virtqueueへのポインタ
  * @param chain ディスクリプタチェーンへのポインタ
- * @parma n 追加するディスクリプタの数
+ * @param n 追加するディスクリプタの数
  * @return 先頭ディスクリプタのインデックス
  */
 int virtq_push(struct virtio_virtq *vq, struct virtio_chain_entry *chain,
