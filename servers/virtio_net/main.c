@@ -1,3 +1,4 @@
+/** @file main.c */
 #include "virtio_net.h"
 #include <libs/common/print.h>
 #include <libs/common/string.h>
@@ -7,12 +8,30 @@
 #include <libs/user/syscall.h>
 #include <libs/user/virtio/virtio_mmio.h>
 
-static task_t tcpip_server;            // TCP/IPサーバのタスクID
-static struct virtio_mmio device;      // virtioデバイスの管理構造体
-static struct virtio_virtq *rx_virtq;  // 受信パケット用virtqueue
-static struct virtio_virtq *tx_virtq;  // 送信パケット用virtqueue
-static dmabuf_t rx_dmabuf;             // 受信パケット用virtqueueで使われるバッファ
-static dmabuf_t tx_dmabuf;             // 送信パケット用virtqueueで使われるバッファ
+/** @ingroup virtio_net
+ * @var tcpip_server
+ * @brief TCP/IPサーバのタスクID */
+static task_t tcpip_server;
+/** @ingroup virtio_net
+ * @var device
+ * @brief virtioデバイスの管理構造体 */
+static struct virtio_mmio device;
+/** @ingroup virtio_net
+ * @var rx_virtq
+ * @brief 受信パケット用virtqueue */
+static struct virtio_virtq *rx_virtq;
+/** @ingroup virtio_net
+ * @var tx_virtq
+ * @brief 送信パケット用virtqueue */
+static struct virtio_virtq *tx_virtq;
+/** @ingroup virtio_net
+ * @var rx_dmabuf
+ * @brief 受信パケット用virtqueueで使われるバッファ */
+static dmabuf_t rx_dmabuf;
+/** @ingroup virtio_net
+ * @var tx_dmabuf
+ * @brief 送信パケット用virtqueueで使われるバッファ */
+static dmabuf_t tx_dmabuf;
 
 // MACアドレスを読み込む
 static void read_macaddr(uint8_t *macaddr) {
@@ -140,6 +159,9 @@ static void init_device(void) {
     ASSERT_OK(sys_irq_listen(VIRTIO_NET_IRQ));
 }
 
+/** @ingroup virtio_net
+ * @brief virtio_netドライバのmain関数
+ */
 void main(void) {
     // デバイスを初期化する
     init_device();
