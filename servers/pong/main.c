@@ -1,7 +1,11 @@
+/** @file main.c */
 #include <libs/common/print.h>
 #include <libs/user/ipc.h>
 #include <libs/user/syscall.h>
 
+/** @ingroup pong
+ * @brief pongサーバのmain関数
+ */
 void main(void) {
     // pongサーバとして登録する
     ASSERT_OK(ipc_register("pong"));

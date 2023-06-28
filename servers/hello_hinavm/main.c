@@ -1,3 +1,4 @@
+/** @file main.c */
 #include <libs/common/hinavm_types.h>
 #include <libs/common/print.h>
 #include <libs/user/ipc.h>
@@ -6,6 +7,10 @@
 
 #define M(field) offsetof(struct message, field)
 
+/** @ingroup hello_hinavm
+ * @var program
+ * @brief プログラム配列
+ */
 union hinavm_inst program[] = {
     I_LABEL(LABEL_0),                  // ラベル0: メインループ
     I_MOVI(R0, IPC_ANY),               // RECV命令に渡す受信元を設定する
@@ -27,6 +32,9 @@ union hinavm_inst program[] = {
     I_JMP(LABEL_0),                    // メインループに戻る
 };
 
+/** @ingroup hello_hinavm
+ * @brief hello_hinavmアプリケーションのmain関数
+ */
 void main(void) {
     // HinaVMタスクを生成する
     task_t server =
