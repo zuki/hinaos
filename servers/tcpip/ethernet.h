@@ -1,3 +1,4 @@
+/** @file ethernet.h */
 #pragma once
 #include "ipv4.h"
 #include "mbuf.h"
@@ -9,17 +10,23 @@
 #define MACADDR_LEN 6
 typedef uint8_t macaddr_t[MACADDR_LEN];
 
-// イーサネットフレームの種類
+/** @ingroup tcpip
+ * @enum ether_type
+ * @brief イーサネットフレームの種類
+ */
 enum ether_type {
-    ETHER_TYPE_IPV4 = 0x0800,
-    ETHER_TYPE_ARP = 0x0806,
+    ETHER_TYPE_IPV4 = 0x0800,   /**< = 0x0800: IPv4 */
+    ETHER_TYPE_ARP = 0x0806,    /**< = 0x0806: ARP */
 };
 
-// イーサーネットフレームヘッダ
+/** @ingroup tcpip
+ * @struct ethernet_header
+ * @brief イーサーネットフレームヘッダ
+ */
 struct ethernet_header {
-    macaddr_t dst;  // 宛先MACアドレス
-    macaddr_t src;  // 送信元MACアドレス
-    uint16_t type;  // ペイロードの種類
+    macaddr_t dst;      /**< 宛先MACアドレス */
+    macaddr_t src;      /**< 送信元MACアドレス */
+    uint16_t type;      /**< ペイロードの種類 */
 } __packed;
 
 void ethernet_transmit(enum ether_type type, ipv4addr_t dst, mbuf_t payload);

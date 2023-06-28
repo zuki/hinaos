@@ -1,3 +1,4 @@
+/** @file main.h */
 #pragma once
 #include "device.h"
 #include "tcp.h"
@@ -8,12 +9,15 @@
 #define TIMER_INTERVAL 100
 #define SOCKETS_MAX    256
 
-// ソケット管理構造体
+/** @ingroup tcpip
+ * @struct socket
+ * @brief ソケット管理構造体
+ */
 struct socket {
-    bool used;                // 使用中か
-    task_t task;              // 所有するタスク
-    int fd;                   // ソケットID
-    struct tcp_pcb *tcp_pcb;  // TCPコントロールブロック
+    bool used;                /**< 使用中か */
+    task_t task;              /**< 所有するタスク */
+    int fd;                   /**< ソケットID */
+    struct tcp_pcb *tcp_pcb;  /**< TCPコントロールブロック */
 };
 
 void callback_ethernet_transmit(mbuf_t pkt);

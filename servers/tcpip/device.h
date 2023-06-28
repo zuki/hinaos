@@ -1,17 +1,21 @@
+/** @file device.h */
 #pragma once
 #include "arp.h"
 #include "ethernet.h"
 #include "ipv4.h"
 #include "mbuf.h"
 
-// デバイス管理構造体
+/** @ingroup tcpip
+ * @struct device
+ * @brief デバイス管理構造体
+ */
 struct device {
-    bool initialized;    // デバイスが初期化されたかどうか
-    bool dhcp_enabled;   // DHCPが有効化されているかどうか
-    macaddr_t macaddr;   // MACアドレス
-    ipv4addr_t ipaddr;   // IPアドレス
-    ipv4addr_t gateway;  // デフォルトゲートウェイ
-    ipv4addr_t netmask;  // ネットマスク
+    bool initialized;    /**< デバイスが初期化されたかどうか */
+    bool dhcp_enabled;   /**< DHCPが有効化されているかどうか */
+    macaddr_t macaddr;   /**< MACアドレス */
+    ipv4addr_t ipaddr;   /**< IPアドレス */
+    ipv4addr_t gateway;  /**< デフォルトゲートウェイ */
+    ipv4addr_t netmask;  /**< ネットマスク */
 };
 
 bool device_dst_is_ours(ipv4addr_t dst);

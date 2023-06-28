@@ -1,3 +1,4 @@
+/** @file dsn.c */
 //
 // DNSクライアント
 //
@@ -10,16 +11,29 @@
 #include <libs/common/string.h>
 #include <libs/user/malloc.h>
 
-// DNSクライアントに利用するUDPソケット
+/** @ingroup tcpip
+ * @var udp_sock
+ * @brief DNSクライアントに利用するUDPソケット */
 static udp_sock_t udp_sock;
-// DNSキャッシュサーバのIPアドレス
+/** @ingroup tcpip
+ * @var dns_server_ipaddr
+ * @brief DNSキャッシュサーバのIPアドレス */
 static ipv4addr_t dns_server_ipaddr;
-// 応答待ちのDNSクエリのリスト
+/** @ingroup tcpip
+ * @var dns_requests
+ * @brief 応答待ちのDNSクエリのリスト */
 static list_t dns_requests = LIST_INIT(dns_requests);
-// 次に使うDNSクエリのID
+/** @ingroup tcpip
+ * @var next_query_id
+ * @brief 次に使うDNSクエリのID */
 static uint16_t next_query_id = 1;
 
-// DNS解決を開始する。
+/** @ingroup tcpip
+ * @brief DNS解決を開始する.
+ * @param hostname ホスト名
+ * @param arg 引数
+ * @return 成功したらOK, エラーの場合はエラーコード
+ */
 error_t dns_query(const char *hostname, void *arg) {
     // DNSヘッダを構築する
     struct dns_header header;
@@ -160,7 +174,9 @@ static void dns_process(mbuf_t payload) {
     }
 }
 
-// 受信済みのDNSパケットを処理する
+/** @ingroup tcpip
+ * @brief 受信済みのDNSパケットを処理する
+ */
 void dns_receive(void) {
     while (true) {
         // 受信済みのパケットを取り出す
@@ -180,12 +196,17 @@ void dns_receive(void) {
     }
 }
 
-// DNSキャッシュサーバのIPアドレスを設定する
+/** @ingroup tcpip
+ * @brief DNSキャッシュサーバのIPアドレスを設定する
+ * @param ipaddr DNSキャッシュサーバのIPアドレス
+ */
 void dns_set_name_server(ipv4addr_t ipaddr) {
     dns_server_ipaddr = ipaddr;
 }
 
-// DNSクライアントの初期化
+/** @ingroup tcpip
+ * @brief DNSクライアントの初期化
+ */
 void dns_init(void) {
     udp_sock = udp_new();
     udp_bind(udp_sock, IPV4_ADDR_UNSPECIFIED, 3535);

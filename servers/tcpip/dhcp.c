@@ -1,3 +1,4 @@
+/** @file dhcp.c */
 //
 // DHCPクライアント
 //
@@ -11,10 +12,17 @@
 #include <libs/common/string.h>
 #include <libs/user/malloc.h>
 
-// DHCPクライアントで利用するUDPソケット
+/** @ingroup tcpip
+ * @var udp_sock
+ * @brief DHCPクライアントで利用するUDPソケット
+ */
 static udp_sock_t udp_sock;
 
-// DHCPパケットの送信
+/** @ingroup tcpip
+ * @brief DHCPパケットの送信
+ * @param type パケットの種類
+ * @param requested_addr 要求するIPアドレス
+ */
 void dhcp_transmit(enum dhcp_type type, ipv4addr_t requested_addr) {
     // ヘッダを構築する
     struct dhcp_header header;
@@ -198,7 +206,9 @@ static void dhcp_process(mbuf_t payload) {
     }
 }
 
-// 受信済みのDHCPパケットを処理する
+/** @ingroup tcpip
+ * @brief 受信済みのDHCPパケットを処理する
+ */
 void dhcp_receive(void) {
     while (true) {
         ipv4addr_t src;
@@ -212,7 +222,9 @@ void dhcp_receive(void) {
     }
 }
 
-// DHCPクライアントの初期化
+/** @ingroup tcpip
+ * @brief DHCPクライアントの初期化
+ */
 void dhcp_init(void) {
     udp_sock = udp_new();
     udp_bind(udp_sock, IPV4_ADDR_UNSPECIFIED, 68);

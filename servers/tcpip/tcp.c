@@ -1,3 +1,4 @@
+/** @file tcp.c */
 #include "tcp.h"
 #include "checksum.h"
 #include "ipv4.h"
@@ -8,9 +9,13 @@
 #include <libs/common/string.h>
 #include <libs/user/syscall.h>
 
-// TCPソケット管理構造体のテーブル
+/** @ingroup tcpip
+ * @var pcbs
+ * @brief TCPソケット管理構造体のテーブル */
 static struct tcp_pcb pcbs[TCP_PCBS_MAX];
-// 使用中のTCPソケット管理構造体のリスト
+/** @ingroup tcpip
+ * @var active_pcbs
+ * @brief 使用中のTCPソケット管理構造体のリスト */
 static list_t active_pcbs = LIST_INIT(active_pcbs);
 
 // ローカルのIPアドレスとポート番号からPCBを検索する。
@@ -64,7 +69,11 @@ static struct tcp_pcb *tcp_lookup(endpoint_t *local_ep, endpoint_t *remote_ep) {
     return NULL;
 }
 
-// 新しいPCBを作成する。
+/** @ingroup tcpip
+ * @brief 新しいPCBを作成する
+ * @param arg 引数
+ * @return 作成したPCBへのポインタ, 空きがない場合はNULL
+ */
 struct tcp_pcb *tcp_new(void *arg) {
     // 空いているPCBを探す。
     struct tcp_pcb *pcb = NULL;
@@ -99,7 +108,13 @@ struct tcp_pcb *tcp_new(void *arg) {
     return pcb;
 }
 
-// TCPコネクションを開く (アクティブオープン)。
+/** @ingroup tcpip
+ * @brief TCPコネクションを開く (アクティブオープン)
+ * @param pcb PCB
+ * @param dst_addr 宛先アドレス
+ * @param dst_port 宛先ポート番号
+ * @return 成功したらOK, そうでなければエラーコード
+ */
 error_t tcp_connect(struct tcp_pcb *pcb, ipv4addr_t dst_addr, port_t dst_port) {
     // エフェメラルポート (49152-65535) から空いているポートを探す。
     for (int port = 49152; port <= 65535; port++) {
@@ -123,7 +138,11 @@ error_t tcp_connect(struct tcp_pcb *pcb, ipv4addr_t dst_addr, port_t dst_port) {
     return ERR_TRY_AGAIN;
 }
 
-// TCPコネクションを削除する。FINパケットを送信するような行儀の良い切断処理はしない。
+/** @ingroup tcpip
+ * @brief TCPコネクションを削除する.
+ * FINパケットを送信するような行儀の良い切断処理はしない。
+ * @param pcb 削除するPCB
+ */
 void tcp_close(struct tcp_pcb *pcb) {
     mbuf_delete(pcb->rx_buf);
     mbuf_delete(pcb->tx_buf);
@@ -131,14 +150,24 @@ void tcp_close(struct tcp_pcb *pcb) {
     pcb->in_use = false;
 }
 
-// 送信するデータをバッファに追加する。
+/** @ingroup tcpip
+ * @brief 送信するデータをバッファに追加する
+ * @param pcb PCB
+ * @param data 送信データ
+ * @param len データ長
+ */
 void tcp_write(struct tcp_pcb *pcb, const void *data, size_t len) {
     mbuf_append_bytes(pcb->tx_buf, data, len);
     pcb->retransmit_at = 0;
 }
 
-// 受信済みデータをバッファから引数 buf へ読み出し、読み出したバイト数を返す。
-// 読み出すデータがない場合は0を返す。
+/** @ingroup tcpip
+ * @brief 受信済みデータをバッファから引数 buf へ読み出し、読み出したバイト数を返す.
+ * @param pcb PCb
+ * @param buf 受信データを読み込むバッファ
+ * @param buf_len バッファ長
+ * @return 実際に読み込んだデータ長. 読み出すデータがない場合は0を返す。
+ */
 size_t tcp_read(struct tcp_pcb *pcb, void *buf, size_t buf_len) {
     size_t read_len = mbuf_read(&pcb->rx_buf, buf, buf_len);
 
@@ -346,7 +375,12 @@ static void tcp_process(struct tcp_pcb *pcb, ipv4addr_t src_addr,
     }
 }
 
-// TCPパケットの受信処理。該当するPCBを探してtcp_process()を呼び出す。
+/** @ingroup tcpip
+ * @brief TCPパケットの受信処理. 該当するPCBを探してtcp_process()を呼び出す。
+ * @param dst 宛先IPアドレス
+ * @param src 送信元IPアドレス
+ * @param pkt TCPパケット
+ */
 void tcp_receive(ipv4addr_t dst, ipv4addr_t src, mbuf_t pkt) {
     // TCPヘッダを読み込む
     struct tcp_header header;
@@ -377,14 +411,18 @@ void tcp_receive(ipv4addr_t dst, ipv4addr_t src, mbuf_t pkt) {
     tcp_process(pcb, src, src_ep.port, &header, pkt);
 }
 
-// 各PCBをチェックし、未送信データがあれば送信する。
+/** @ingroup tcpip
+ * @brief 各PCBをチェックし、未送信データがあれば送信する
+ */
 void tcp_flush(void) {
     LIST_FOR_EACH (pcb, &active_pcbs, struct tcp_pcb, next) {
         tcp_transmit(pcb);
     }
 }
 
-// TCP実装の初期化
+/** @ingroup tcpip
+ * @brief TCP実装の初期化
+ */
 void tcp_init(void) {
     list_init(&active_pcbs);
     for (int i = 0; i < TCP_PCBS_MAX; i++) {

@@ -1,3 +1,4 @@
+/** @file main.c */
 #include "main.h"
 #include "device.h"
 #include "dhcp.h"
@@ -11,9 +12,13 @@
 #include <libs/user/malloc.h>
 #include <libs/user/syscall.h>
 
-// ネットワークデバイスドライバサーバ
+/** @ingroup tcpip
+ * @var net_device
+ * @brief ネットワークデバイスドライバサーバ */
 static task_t net_device;
-// ソケット管理構造体
+/** @ingroup tcpip
+ * @var sockets
+ * @brief ソケット管理構造体配列 */
 static struct socket sockets[SOCKETS_MAX];
 
 // ソケットIDを割り当てる。使えるソケットIDがなければ0を返す。
@@ -60,7 +65,10 @@ static void do_task_destroyed(task_t task) {
     }
 }
 
-// デバイスドライバへパケットを送信する。
+/** @ingroup tcpip
+ * @brief デバイスドライバへパケットを送信する。
+ * @param pkt パケット
+ */
 void callback_ethernet_transmit(mbuf_t pkt) {
     struct message m;
     size_t len = mbuf_len(pkt);
@@ -88,7 +96,10 @@ static struct socket *get_socket_from_pcb(struct tcp_pcb *pcb) {
     return (struct socket *) pcb->arg;
 }
 
-// TCPソケットに新しいデータが届いたときに呼ばれる。
+/** @ingroup tcpip
+ * @brief TCPソケットに新しいデータが届いたときに呼ばれる
+ * @param pcb TCPソケット
+ */
 void callback_tcp_data(struct tcp_pcb *pcb) {
     struct socket *sock = get_socket_from_pcb(pcb);
 
@@ -98,7 +109,10 @@ void callback_tcp_data(struct tcp_pcb *pcb) {
     ipc_send_async(sock->task, &m);
 }
 
-// TCPコネクションが閉じられたとき (パッシブクローズ) に呼ばれる。
+/** @ingroup tcpip
+ * @brief TCPコネクションが閉じられたとき (パッシブクローズ) に呼ばれる
+ * @param pcb TCPソケット
+ */
 void callback_tcp_fin(struct tcp_pcb *pcb) {
     struct socket *sock = get_socket_from_pcb(pcb);
 
@@ -108,7 +122,10 @@ void callback_tcp_fin(struct tcp_pcb *pcb) {
     ipc_send_async(sock->task, &m);
 }
 
-// TCPコネクションがリセットされたときに呼ばれる。
+/** @ingroup tcpip
+ * @brief TCPコネクションがリセットされたときに呼ばれる
+ * @param pcb TCPソケット
+ */
 void callback_tcp_rst(struct tcp_pcb *pcb) {
     struct socket *sock = get_socket_from_pcb(pcb);
 
@@ -118,7 +135,11 @@ void callback_tcp_rst(struct tcp_pcb *pcb) {
     ipc_send_async(sock->task, &m);
 }
 
-// DNSサーバから応答が届いたときに呼ばれる。
+/** @ingroup tcpip
+ * @brief DNSサーバから応答が届いたときに呼ばれる
+ * @param addr IPアドレス
+ * @param arg 引数
+ */
 void callback_dns_got_answer(ipv4addr_t addr, void *arg) {
     struct message m;
     m.type = TCPIP_DNS_RESOLVE_REPLY_MSG;
@@ -126,6 +147,9 @@ void callback_dns_got_answer(ipv4addr_t addr, void *arg) {
     ipc_reply((task_t) arg, &m);
 }
 
+/** @ingroup tcpip
+ * @brief TCP/IPサーバのmain関数
+ */
 void main(void) {
     TRACE("starting...");
 

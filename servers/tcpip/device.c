@@ -1,10 +1,14 @@
+/** device.c */
 #include "device.h"
 #include "dhcp.h"
 #include "ipv4.h"
 #include <libs/common/print.h>
 #include <libs/common/string.h>
 
-// ネットワークデバイス。現在は1つだけのデバイスしかサポートしていない。
+/** @ingroup tcpip
+ * @var device
+ * @brief ネットワークデバイス. 現在は1つだけのデバイスしかサポートしていない。
+ */
 static struct device device;
 
 // 2つのIPv4アドレスが、与えられたネットマスクで同じネットワークに属するかどうかを返す。
@@ -13,14 +17,22 @@ static inline bool ipaddr_equals_in_netmask(ipv4addr_t a, ipv4addr_t b,
     return (a & netmask) == (b & netmask);
 }
 
-// 与えられた宛先IPv4アドレスへのパケットを受信すべきかどうかを返す。
+/** @ingroup tcpip
+ * @brief 与えられた宛先IPv4アドレスへのパケットを受信すべきかどうかを返す。
+ * @param dst 宛先IPアドレス
+ * @return 受信すべきときはtrue, そうでなければfalse
+ */
 bool device_dst_is_ours(ipv4addr_t dst) {
     ASSERT(device.initialized);
 
     return dst == device.ipaddr || dst == IPV4_ADDR_BROADCAST;
 }
 
-// 与えられた宛先IPv4アドレスへのパケットをどこに送るべきかを返す。
+/** @ingroup tcpip
+ * @brief 与えられた宛先IPv4アドレスへのパケットをどこに送るべきかを返す
+ * @param dst 宛先IPアドレス
+ * @return 送るべきIPアドレス
+ */
 ipv4addr_t device_get_next_hop(ipv4addr_t dst) {
     ASSERT(device.initialized);
 
@@ -37,21 +49,32 @@ ipv4addr_t device_get_next_hop(ipv4addr_t dst) {
     }
 }
 
-// デバイスのMACアドレスを返す。
+/** @ingroup tcpip
+ * @brief デバイスのMACアドレスを返す.
+ * @return デバイスのMACアドレス
+ */
 macaddr_t *device_get_macaddr(void) {
     ASSERT(device.initialized);
 
     return &device.macaddr;
 }
 
-// デバイスのIPアドレスを返す。
+/** @ingroup tcpip
+ * @brief デバイスのIPアドレスを返す.
+ * @return デバイスのIPアドレス
+ */
 ipv4addr_t device_get_ipaddr(void) {
     ASSERT(device.initialized);
 
     return device.ipaddr;
 }
 
-// デバイスのIPアドレス、ネットマスク、デフォルトゲートウェイを設定する。
+/** @ingroup tcpip
+ * @brief デバイスのIPアドレス、ネットマスク、デフォルトゲートウェイを設定する.
+ * @param ipaddr IPアドレス
+ * @param netmask ネットマスク
+ * @param gateway デフォルトゲートウェイ
+ */
 void device_set_ip_addrs(ipv4addr_t ipaddr, ipv4addr_t netmask,
                          ipv4addr_t gateway) {
     ASSERT(device.initialized);
@@ -61,18 +84,26 @@ void device_set_ip_addrs(ipv4addr_t ipaddr, ipv4addr_t netmask,
     device.gateway = gateway;
 }
 
-// デバイスが利用可能状態かどうかを返す。
+/** @ingroup tcpip
+ * @brief デバイスが利用可能状態かどうかを返す。
+ * @return 使用可能であればtrue, そうでなければfalse
+ */
 bool device_ready(void) {
     return device.initialized && device.ipaddr != IPV4_ADDR_UNSPECIFIED;
 }
 
-// デバイスのDHCPクライアントを有効化し、DHCP DISCOVERを送信する。
+/** @ingroup tcpip
+ * @brief デバイスのDHCPクライアントを有効化し、DHCP DISCOVERを送信する.
+ */
 void device_enable_dhcp(void) {
     device.dhcp_enabled = true;
     dhcp_transmit(DHCP_TYPE_DISCOVER, IPV4_ADDR_UNSPECIFIED);
 }
 
-// デバイスの初期化を行う。
+/** @ingroup tcpip
+ * @brief デバイスの初期化を行う.
+ * @param macaddr MACアドレス
+ */
 void device_init(macaddr_t *macaddr) {
     device.initialized = true;
     device.dhcp_enabled = false;

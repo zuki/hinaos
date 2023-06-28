@@ -1,10 +1,14 @@
+/** @file checksum.h */
 #pragma once
 #include "mbuf.h"
 #include <libs/common/endian.h>
 #include <libs/common/print.h>
 #include <libs/common/types.h>
 
-// チェックサム計算の途中結果を表す型。チェックサムであることを明示するために新しい型を定義する。
+/** @ingroup tcpip
+ * @typedef checksum_t
+ * @brief チェックサム計算の途中結果を表す型. チェックサムであることを明示するために新しい型を定義する。
+ */
 typedef uint32_t checksum_t;
 
 // チェックサム計算の初期化

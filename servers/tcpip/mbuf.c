@@ -1,9 +1,12 @@
+/** @file mbuf.c */
 #include "mbuf.h"
 #include <libs/common/print.h>
 #include <libs/common/string.h>
 #include <libs/user/malloc.h>
 
-// mbufを割り当てる。
+/** @ingroup tcpip
+ * @brief mbufを割り当てる
+ */
 mbuf_t mbuf_alloc(void) {
     struct mbuf *m = malloc(sizeof(*m));
     m->next = NULL;
@@ -12,7 +15,11 @@ mbuf_t mbuf_alloc(void) {
     return m;
 }
 
-// 新たにmbufを割り当てて、指定したデータをコピーする。
+/** @ingroup tcpip
+ * @brief 新たにmbufを割り当てて、指定したデータをコピーする
+ * @param data データ
+ * @param len データ長
+ */
 mbuf_t mbuf_new(const void *data, size_t len) {
     struct mbuf *head = NULL;
     struct mbuf *tail = NULL;
@@ -41,7 +48,10 @@ mbuf_t mbuf_new(const void *data, size_t len) {
     return head;
 }
 
-// mbufチェーン全体を解放する
+/** @ingroup tcpip
+ * @brief mbufチェーン全体を解放する
+ * @param mbuf mbufチェーン
+ */
 void mbuf_delete(mbuf_t mbuf) {
     if (!mbuf) {
         return;
@@ -54,7 +64,11 @@ void mbuf_delete(mbuf_t mbuf) {
     } while (mbuf);
 }
 
-// mbufチェーンの末尾に、新たなmbufを追加する
+/** @ingroup tcpip
+ * @brief mbufチェーンの末尾に、新たなmbufを追加する
+ * @param mbuf mbufチェーン
+ * @param new_tail 追加するmbuf
+ */
 void mbuf_append(mbuf_t mbuf, mbuf_t new_tail) {
     struct mbuf *m = mbuf;
     while (m->next) {
@@ -63,7 +77,12 @@ void mbuf_append(mbuf_t mbuf, mbuf_t new_tail) {
     m->next = new_tail;
 }
 
-// mbufチェーンの末尾に、指定したデータを追加する
+/** @ingroup tcpip
+ * @brief mbufチェーンの末尾に、指定したデータを追加する
+ * @param mbuf mbufチェーン
+ * @param data 追加データ
+ * @param len 追加データ長
+ */
 void mbuf_append_bytes(mbuf_t mbuf, const void *data, size_t len) {
     // 末尾のmbufを探す
     while (mbuf->next != NULL) {
@@ -85,22 +104,38 @@ void mbuf_append_bytes(mbuf_t mbuf, const void *data, size_t len) {
     }
 }
 
-// mbufが空かどうかを返す。複数の要素から成るチェーンであっても、全てのmbufが空であればtrueを返す。
+/** @ingroup tcpip
+ * @brief mbufが空かどうかを返す. 複数の要素から成るチェーンであっても、全てのmbufが空であればtrueを返す
+ * @param mbuf mbufチェーン
+ * @return mbufが空であればtrue, そうでなければfalse
+ */
 bool mbuf_is_empty(mbuf_t mbuf) {
     return mbuf_len(mbuf) == 0;
 }
 
-// mbufの先頭のデータを返す
+/** @ingroup tcpip
+ * @brief mbufの先頭のデータを返す
+ * @param mbuf mbufチェーン
+ * @return 先頭のmbufのデータへのポインタ
+ */
 const void *mbuf_data(mbuf_t mbuf) {
     return &mbuf->data[mbuf->offset];
 }
 
-// mbufの単一要素の長さを返す
+/** @ingroup tcpip
+ * @brief mbufの単一要素の長さを返す
+ * @param mbuf mbufチェーン
+ * @return mbufの単一要素の長さ
+ */
 size_t mbuf_len_one(mbuf_t mbuf) {
     return mbuf->offset_end - mbuf->offset;
 }
 
-// mbufチェーン全体の長さを返す
+/** @ingroup tcpip
+ * @brief mbufチェーン全体の長さを返す
+ * @param mbuf mbufチェーン
+ * @return mbufチェーン全体の長さ
+ */
 size_t mbuf_len(mbuf_t mbuf) {
     size_t total_len = 0;
     while (mbuf) {
@@ -110,7 +145,13 @@ size_t mbuf_len(mbuf_t mbuf) {
     return total_len;
 }
 
-// mbufから指定した長さだけデータを読み込む。実際に読み込んだ長さを返す。
+/** @ingroup tcpip
+ * @brief mbufから指定した長さだけデータを読み込む. 実際に読み込んだ長さを返す。
+ * @param mbuf mbufチェーン
+ * @param buf 読み込み用のバッファ
+ * @param buf_len バッファ長
+ * @return 実際に読み込んだ長さ
+ */
 size_t mbuf_read(mbuf_t *mbuf, void *buf, size_t buf_len) {
     size_t read_len = 0;
     while (true) {
@@ -123,13 +164,13 @@ size_t mbuf_read(mbuf_t *mbuf, void *buf, size_t buf_len) {
             continue;
         }
 
-        // Compute the length that we can copy from the mbuf.
+        // mbufからコピーできる長さを計算する
         size_t copy_len = MIN(buf_len - read_len, mbuf_len);
         if (!copy_len) {
             break;
         }
 
-        // Copy data and advance the offset.
+        // データをコピーしてオフセットを進める
         memcpy(&buf[read_len], mbuf_data(*mbuf), copy_len);
         (*mbuf)->offset += copy_len;
         read_len += copy_len;
@@ -146,7 +187,12 @@ static void mbuf_copy_one(mbuf_t dst, mbuf_t src) {
     memcpy(dst->data, src->data, mbuf_len_one(src));
 }
 
-// mbufチェーンから指定した長さだけデータを読み込み、新しいmbufとして返す。
+/** @ingroup tcpip
+ * @brief mbufチェーンから指定した長さだけデータを読み込み、新しいmbufとして返す。
+ * @param mbuf mbufチェーン
+ * @param len 読み込む長さ
+ * @return 新しいmbuf
+ */
 mbuf_t mbuf_peek(mbuf_t mbuf, size_t len) {
     mbuf_t dst = mbuf_alloc();
     mbuf_t head = dst;
@@ -168,7 +214,12 @@ mbuf_t mbuf_peek(mbuf_t mbuf, size_t len) {
     return head;
 }
 
-// mbufチェーンの先頭から指定したバイトだけ破棄する。
+/** @ingroup tcpip
+ * @brief mbufチェーンの先頭から指定したバイトだけ破棄する
+ * @param mbuf mbufチェーン
+ * @param len 破棄する長さ
+ * @return 破棄した長さ
+ */
 size_t mbuf_discard(mbuf_t *mbuf, size_t len) {
     size_t remaining = len;
     while (remaining > 0) {
@@ -194,7 +245,11 @@ size_t mbuf_discard(mbuf_t *mbuf, size_t len) {
     return len - remaining;
 }
 
-// 指定したバイト数になるように、mbufチェーンの末尾からデータを削除する (切り詰める)。
+/** @ingroup tcpip
+ * @brief 指定したバイト数になるように、mbufチェーンの末尾からデータを削除する (切り詰める)
+ * @param mbuf mbufチェーン
+ * @param len 指定のバイト数
+ */
 void mbuf_truncate(mbuf_t mbuf, size_t len) {
     while (mbuf && len > 0) {
         size_t mbuf_len = mbuf_len_one(mbuf);
@@ -211,7 +266,11 @@ void mbuf_truncate(mbuf_t mbuf, size_t len) {
     }
 }
 
-// mbufチェーンを複製する
+/** @ingroup tcpip
+ * @brief mbufチェーンを複製する
+ * @param mbuf mbufチェーン
+ * @return 複製したmbufチェーンへのポインタ
+ */
 mbuf_t mbuf_clone(mbuf_t mbuf) {
     mbuf_t head = mbuf_alloc();
     mbuf_t clone = head;

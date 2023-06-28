@@ -1,3 +1,4 @@
+/** @file ipv4.c */
 #include "ipv4.h"
 #include "checksum.h"
 #include "device.h"
@@ -8,7 +9,12 @@
 #include <libs/common/print.h>
 #include <libs/common/string.h>
 
-// IPv4パケットの送信処理
+/** @ingroup tcpip
+ * @brief IPv4パケットの送信処理
+ * @param dst 宛先IPアドレス
+ * @param proto プロトコル
+ * @param payload データ
+ */
 void ipv4_transmit(ipv4addr_t dst, uint8_t proto, mbuf_t payload) {
     // IPv4ヘッダを構築
     struct ipv4_header header;
@@ -33,7 +39,10 @@ void ipv4_transmit(ipv4addr_t dst, uint8_t proto, mbuf_t payload) {
     ethernet_transmit(ETHER_TYPE_IPV4, dst, pkt);
 }
 
-// IPv4パケットの受信処理
+/** @ingroup tcpip
+ * @brief IPv4パケットの受信処理
+ * @param pkt パケット
+ */
 void ipv4_receive(mbuf_t pkt) {
     // IPv4ヘッダを読み込む
     struct ipv4_header header;

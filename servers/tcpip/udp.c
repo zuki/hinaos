@@ -1,3 +1,4 @@
+/** @file udp.c */
 #include "udp.h"
 #include "checksum.h"
 #include "device.h"
@@ -8,9 +9,13 @@
 #include <libs/common/string.h>
 #include <libs/user/malloc.h>
 
-// UDPソケット管理構造体のテーブル
+/** @ingroup tcpip
+ * @var pcbs
+ * @brief UDPソケット管理構造体のテーブル */
 static struct udp_pcb pcbs[UDP_PCBS_MAX];
-// 使用中のUDPソケット管理構造体のリスト
+/** @ingroup tcpip
+ * @var active_pcbs
+ * @brief 使用中のUDPソケット管理構造体のリスト */
 static list_t active_pcbs = LIST_INIT(active_pcbs);
 
 // ポート番号に対応するUDPソケット管理構造体を探す。
@@ -24,7 +29,10 @@ static struct udp_pcb *udp_lookup(port_t dst_port) {
     return NULL;
 }
 
-// 新しいUDPソケットを割り当てる。
+/** @ingroup tcpip
+ * @brief 新しいUDPソケットを割り当てる。
+ * @return 新しいUDPソケットへのポインタ, 未使用のソケットがない場合はNULL
+ */
 struct udp_pcb *udp_new(void) {
     // 未使用のUDPソケット管理構造体を探す。
     struct udp_pcb *pcb = NULL;
@@ -49,13 +57,21 @@ struct udp_pcb *udp_new(void) {
     return pcb;
 }
 
-// UDPソケットを閉じる。
+/** @ingroup tcpip
+ * @brief UDPソケットを閉じる
+ * @param pcb UDPソケットへのポインタ
+ */
 void udp_close(struct udp_pcb *pcb) {
     list_remove(&pcb->next);
     pcb->in_use = false;
 }
 
-// UDPソケットにローカルアドレスとポート番号を紐付ける。
+/** @ingroup tcpip
+ * @brief UDPソケットにローカルアドレスとポート番号を紐付ける
+ * @param pcb UDPソケット
+ * @param addr ローカルIPアドレス
+ * @param port ローカルポートアドレス
+ */
 void udp_bind(struct udp_pcb *pcb, ipv4addr_t addr, port_t port) {
     ASSERT(udp_lookup(port) == NULL);
 
@@ -64,7 +80,13 @@ void udp_bind(struct udp_pcb *pcb, ipv4addr_t addr, port_t port) {
     list_push_back(&active_pcbs, &pcb->next);
 }
 
-// UDPデータグラムを送信する。ペイロードとしてmbufを使う。
+/** @ingroup tcpip
+ * @brief UDPデータグラムを送信する. ペイロードとしてmbufを使う。
+ * @param pcb UDPソケット
+ * @param dst 宛先IPアドレス
+ * @param dst_port 宛先ポート番号
+ * @param payload 送信データ(mbuf)
+ */
 void udp_sendto_mbuf(struct udp_pcb *pcb, ipv4addr_t dst, port_t dst_port,
                      mbuf_t payload) {
     struct udp_datagram *dg = (struct udp_datagram *) malloc(sizeof(*dg));
@@ -75,13 +97,26 @@ void udp_sendto_mbuf(struct udp_pcb *pcb, ipv4addr_t dst, port_t dst_port,
     list_push_back(&pcb->tx, &dg->next);
 }
 
-// UDPデータグラムを送信する。
+/** @ingroup tcpip
+ * @brief UDPデータグラムを送信する
+ * @param pcb UDPソケット
+ * @param dst 宛先IPアドレス
+ * @param dst_port 宛先ポート番号
+ * @param data 送信データ
+ * @param len 送信データ長
+ */
 void udp_sendto(struct udp_pcb *pcb, ipv4addr_t dst, port_t dst_port,
                 const void *data, size_t len) {
     return udp_sendto_mbuf(pcb, dst, dst_port, mbuf_new(data, len));
 }
 
-// 受信済みのUDPデータグラムを取り出す。ペイロードをmbufで返す。
+/** @ingroup tcpip
+ * @brief 受信済みのUDPデータグラムを取り出す. ペイロードをmbufで返す。
+ * @param pcb UDPソケット
+ * @param src 送信元IPアドレス（設定用）
+ * @param src_port 送信元ポート番号（設定用）
+ * @return mbuf形式の受信UDPペイロード
+ */
 mbuf_t udp_recv_mbuf(struct udp_pcb *pcb, ipv4addr_t *src, port_t *src_port) {
     list_elem_t *e = list_pop_front(&pcb->rx);
     if (!e) {
@@ -96,7 +131,15 @@ mbuf_t udp_recv_mbuf(struct udp_pcb *pcb, ipv4addr_t *src, port_t *src_port) {
     return payload;
 }
 
-// 受信済みのUDPデータグラムを取り出す。
+/** @ingroup tcpip
+ * @brief 受信済みのUDPデータグラムを取り出す
+ * @param pcb UDPソケット
+ * @param buf 受信データを読み込むバッファ
+ * @param buf_len バッファ長
+ * @param src 送信元IPアドレス（設定用）
+ * @param src_port 送信元ポート番号（設定用）
+ * @return 実際に読み込んだデータ長
+ */
 size_t udp_recv(struct udp_pcb *pcb, void *buf, size_t buf_len, ipv4addr_t *src,
                 port_t *src_port) {
     mbuf_t payload = udp_recv_mbuf(pcb, src, src_port);
@@ -110,7 +153,10 @@ size_t udp_recv(struct udp_pcb *pcb, void *buf, size_t buf_len, ipv4addr_t *src,
     return len;
 }
 
-// UDPパケットの送信処理
+/** @ingroup tcpip
+ * @brief UDPパケットの送信処理
+ * @param pcb UDPソケット
+ */
 void udp_transmit(struct udp_pcb *pcb) {
     // 送信するデータグラムを取得
     list_elem_t *e = list_pop_front(&pcb->tx);
@@ -146,7 +192,11 @@ void udp_transmit(struct udp_pcb *pcb) {
     ipv4_transmit(dg->addr, IPV4_PROTO_UDP, pkt);
 }
 
-// UDPパケットの受信処理
+/** @ingroup tcpip
+ * @brief UDPパケットの受信処理
+ * @param src 送信元IPアドレス
+ * @param pkt UDPパケット
+ */
 void udp_receive(ipv4addr_t src, mbuf_t pkt) {
     // UDPヘッダを読み込む
     struct udp_header header;

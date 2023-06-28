@@ -1,3 +1,4 @@
+/** @file ethernet.c */
 #include "ethernet.h"
 #include "arp.h"
 #include "device.h"
@@ -8,7 +9,12 @@
 #include <libs/common/print.h>
 #include <libs/common/string.h>
 
-// イーサーネットフレームを送信する。
+/** @ingroup tcpip
+ * @brief イーサーネットフレームを送信する
+ * @param type イーサーネット種別
+ * @param dst 宛先IPアドレス
+ * @param payload データ
+ */
 void ethernet_transmit(enum ether_type type, ipv4addr_t dst, mbuf_t payload) {
     // パケットをどこに送るかを決定する。
     ipv4addr_t next_hop = device_get_next_hop(dst);
@@ -41,7 +47,11 @@ void ethernet_transmit(enum ether_type type, ipv4addr_t dst, mbuf_t payload) {
     callback_ethernet_transmit(pkt);
 }
 
-// イーサーネットフレームの受信処理。
+/** @ingroup tcpip
+ * @brief イーサーネットフレームの受信処理
+ * @param pkt パケット受信バッファ
+ * @param len 受信サイズ
+ */
 void ethernet_receive(const void *pkt, size_t len) {
     mbuf_t m = mbuf_new(pkt, len);
 

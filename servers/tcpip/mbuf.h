@@ -1,18 +1,25 @@
+/** @file mbuf.h */
 #pragma once
 #include <libs/common/types.h>
 
 // mbufのデータ部分のサイズ
 #define MBUF_MAX_LEN (512 - (sizeof(struct mbuf *) + 2 * sizeof(uint16_t)))
 
-// mbuf: 単方向リストで構成される非連続メモリバッファ
+/** @ingroup tcpip
+ * @struct mbuf
+ * @brief mbuf: 単方向リストで構成される非連続メモリバッファ
+ */
 struct mbuf {
-    struct mbuf *next;           // 次のmbufへのポインタ
-    uint16_t offset;             // 有効なデータの先頭オフセット
-    uint16_t offset_end;         // 有効化データの終端オフセット
-    uint8_t data[MBUF_MAX_LEN];  // データ
+    struct mbuf *next;           /**< 次のmbufへのポインタ */
+    uint16_t offset;             /**< 有効なデータの先頭オフセット */
+    uint16_t offset_end;         /**< 有効化データの終端オフセット */
+    uint8_t data[MBUF_MAX_LEN];  /**< データ */
 };
 
-// mbufを表す型。いわゆるopaqueポインタ。
+/** @ingroup tcpip
+ * @typedef mbuf_t
+ * @brief mbufを表す型. いわゆるopaqueポインタ。
+ */
 typedef struct mbuf *mbuf_t;
 
 mbuf_t mbuf_alloc(void);
