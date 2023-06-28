@@ -1,9 +1,14 @@
+/** @file fs.c */
 #include "fs.h"
 #include <libs/common/print.h>
 #include <libs/common/string.h>
 #include <libs/user/ipc.h>
 #include <libs/user/malloc.h>
 
+/** @ingroup shell
+ * @brief catコマンドの実体. ファイルを読み込む
+ * @param path ファイルパス
+ */
 void fs_read(const char *path) {
     task_t fs_server = ipc_lookup("fs");
     ASSERT_OK(fs_server);
@@ -42,6 +47,12 @@ void fs_read(const char *path) {
     }
 }
 
+/** @ingroup shell
+ * @brief writeコマンドの実体. ファイルを作成して書き込む
+ * @param path ファイルパス
+ * @param buf データバッファ
+ * @param len データ長
+ */
 void fs_write(const char *path, const uint8_t *buf, size_t len) {
     task_t fs_server = ipc_lookup("fs");
     ASSERT_OK(fs_server);
@@ -84,6 +95,10 @@ void fs_write(const char *path, const uint8_t *buf, size_t len) {
     ASSERT(m.type == FS_WRITE_REPLY_MSG);
 }
 
+/** @ingroup shell
+ * @brief lsコマンドの実体. ディレクトリを走査してファイルを出力する。
+ * @param path ディレクトリパス
+ */
 void fs_listdir(const char *path) {
     task_t fs_server = ipc_lookup("fs");
     ASSERT_OK(fs_server);
@@ -111,6 +126,10 @@ void fs_listdir(const char *path) {
     }
 }
 
+/** @ingroup shell
+ * @brief mkdirコマンドの実体. ディレクトリを作成する。
+ * @param path ディレクトリパス
+ */
 void fs_mkdir(const char *path) {
     task_t fs_server = ipc_lookup("fs");
     ASSERT_OK(fs_server);
@@ -127,6 +146,10 @@ void fs_mkdir(const char *path) {
     ASSERT(m.type == FS_MKDIR_REPLY_MSG);
 }
 
+/** @ingroup shell
+ * @brief deleteコマンドの実体. パスを削除する。
+ * @param path パス
+ */
 void fs_delete(const char *path) {
     task_t fs_server = ipc_lookup("fs");
     ASSERT_OK(fs_server);

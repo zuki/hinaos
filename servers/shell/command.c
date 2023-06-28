@@ -1,3 +1,4 @@
+/** @file command.c */
 #include "command.h"
 #include "fs.h"
 #include "http.h"
@@ -6,6 +7,7 @@
 #include <libs/user/ipc.h>
 #include <libs/user/syscall.h>
 
+// echoコマンドの実行関数
 static void do_echo(struct args *args) {
     for (int i = 1; i < args->argc; i++) {
         printf("%s ", args->argv[i]);
@@ -13,6 +15,7 @@ static void do_echo(struct args *args) {
     printf(PRINT_NL);
 }
 
+// httpコマンドの実行関数
 static void do_http(struct args *args) {
     if (args->argc != 2) {
         WARN("Usage: http <URL>");
@@ -22,6 +25,7 @@ static void do_http(struct args *args) {
     http_get(args->argv[1]);
 }
 
+// catコマンドの実行関数
 static void do_cat(struct args *args) {
     if (args->argc != 2) {
         WARN("Usage: cat <PATH>");
@@ -31,6 +35,7 @@ static void do_cat(struct args *args) {
     fs_read(args->argv[1]);
 }
 
+// writeコマンドの実行関数
 static void do_write(struct args *args) {
     if (args->argc != 3) {
         WARN("Usage: write <PATH> <TEXT>");
@@ -41,6 +46,7 @@ static void do_write(struct args *args) {
              strlen(args->argv[2]));
 }
 
+// lsコマンドの実行関数
 static void do_listdir(struct args *args) {
     const char *path;
     if (args->argc < 2) {
@@ -52,6 +58,7 @@ static void do_listdir(struct args *args) {
     fs_listdir(path);
 }
 
+// mkdirコマンドの実行関数
 static void do_mkdir(struct args *args) {
     if (args->argc != 2) {
         WARN("Usage: mkdir <PATH>");
@@ -61,6 +68,7 @@ static void do_mkdir(struct args *args) {
     fs_mkdir(args->argv[1]);
 }
 
+// deleteコマンドの実行関数
 static void do_delete(struct args *args) {
     if (args->argc != 2) {
         WARN("Usage: delete <PATH>");
@@ -70,6 +78,7 @@ static void do_delete(struct args *args) {
     fs_delete(args->argv[1]);
 }
 
+// startコマンドの実行関数
 static void do_start(struct args *args) {
     if (args->argc != 2) {
         WARN("Usage: start <NAME>");
@@ -97,6 +106,7 @@ static void do_start(struct args *args) {
     }
 }
 
+// sleepコマンドの実行関数
 static void do_sleep(struct args *args) {
     if (args->argc != 2) {
         WARN("Usage: sleep <SECONDS>");
@@ -119,6 +129,7 @@ static void do_sleep(struct args *args) {
     } while (m.type != NOTIFY_TIMER_MSG);
 }
 
+// pingコマンドの実行関数
 static void do_ping(struct args *args) {
     if (args->argc != 2) {
         WARN("Usage: ping <VALUE>");
@@ -138,16 +149,22 @@ static void do_ping(struct args *args) {
     ASSERT(m.ping_reply.value == 42);
 }
 
+// uptimeコマンドの実行関数
 static void do_uptime(struct args *args) {
     printf("%d seconds\n", sys_uptime());
 }
 
+// shutdownコマンドの実行関数
 __noreturn static void do_shutdown(struct args *args) {
     INFO("shutting down...");
     sys_shutdown();
 }
 
 static void do_help(struct args *args);
+/** @ingroup shell
+ * @var commands
+ * @brief コマンド定義配列
+*/
 static struct command commands[] = {
     {.name = "help", .run = do_help, .help = "Show this help"},
     {.name = "echo", .run = do_echo, .help = "Print arguments"},
@@ -165,6 +182,7 @@ static struct command commands[] = {
     {.name = NULL},
 };
 
+// helpコマンドの実行関数
 static void do_help(struct args *args) {
     struct command *cmd = commands;
     INFO("");
@@ -177,6 +195,10 @@ static void do_help(struct args *args) {
     INFO("");
 }
 
+/** @ingroup shell
+ * @brief コマンドを実行する
+ * @param args 引数配列. args[0]がコマンド名
+ */
 void run_command(struct args *args) {
     if (args->argc == 0) {
         return;

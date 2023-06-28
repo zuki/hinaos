@@ -1,9 +1,11 @@
+/** @file main.c */
 #include "command.h"
 #include <libs/common/print.h>
 #include <libs/common/string.h>
 #include <libs/user/ipc.h>
 #include <libs/user/syscall.h>
 
+// 先頭のホワイトスペースを取り除く
 static char *skip_whitespaces(char *p) {
     for (;;) {
         switch (*p) {
@@ -18,6 +20,7 @@ static char *skip_whitespaces(char *p) {
     }
 }
 
+// 次の引数へ移動する
 static char *consume_argv(char *p) {
     for (;;) {
         switch (*p) {
@@ -36,6 +39,7 @@ static char *consume_argv(char *p) {
     }
 }
 
+// スクリプト文字列を評価する
 static void eval(char *script) {
     char *p = script;
 
@@ -58,6 +62,7 @@ static void eval(char *script) {
     }
 }
 
+// シリアルからコマンドラインを入力する
 static error_t read_line(char *cmdline, int len) {
     int i = 0;
     while (true) {
@@ -76,13 +81,13 @@ static error_t read_line(char *cmdline, int len) {
 
             char ch = buf[j];
             switch (ch) {
-                case 0x1b:
+                case 0x1b:  // ESC
                     if (j + 2 < read_len) {
                         // 矢印キー入力を無視する
                         j += 2;
                     }
                     continue;
-                case 0x7f:
+                case 0x7f:  // DEL
                     if (i > 0) {
                         printf("\b \b");
                         printf_flush();
@@ -108,6 +113,10 @@ static error_t read_line(char *cmdline, int len) {
         }
     }
 }
+
+/** @ingroup shell
+ * @brief shellのmain関数
+ */
 void main(void) {
     char cmdline[1024];
 

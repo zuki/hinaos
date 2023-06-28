@@ -1,3 +1,4 @@
+/** @file http.c */
 #include "http.h"
 #include <libs/common/ctype.h>
 #include <libs/common/print.h>
@@ -5,8 +6,13 @@
 #include <libs/user/ipc.h>
 #include <libs/user/malloc.h>
 
+/** @ingroup shell
+ * @var tcpip_server
+ * @brief TCP/IPサーバタスクのID
+ */
 static task_t tcpip_server;
 
+// データを送信する
 static void send(int sock, const uint8_t *buf, size_t len) {
     struct message m;
     ASSERT(len < sizeof(m.tcpip_write.data));
@@ -18,6 +24,7 @@ static void send(int sock, const uint8_t *buf, size_t len) {
     ASSERT_OK(ipc_call(tcpip_server, &m));
 }
 
+// 受信したデータを表示する
 static void received(int sock, uint8_t *buf, size_t len) {
     // char *sep = strstr((char *) buf, "\r\n\r\n");
     buf[len] = '\0';
@@ -25,6 +32,7 @@ static void received(int sock, uint8_t *buf, size_t len) {
     return;
 }
 
+// IPアドレス文字列を数値に変換する
 static error_t parse_ipaddr(const char *str, uint32_t *ip_addr) {
     char *s_orig = strdup(str);
     char *s = s_orig;
@@ -48,6 +56,7 @@ static error_t parse_ipaddr(const char *str, uint32_t *ip_addr) {
     return OK;
 }
 
+// URLを解決する: IPアドレス, ポート, パスを取得する
 static error_t resolve_url(const char *url, uint32_t *ip_addr, uint16_t *port,
                            char **path) {
     char *s_orig = strdup(url);
@@ -59,7 +68,8 @@ static error_t resolve_url(const char *url, uint32_t *ip_addr, uint16_t *port,
         return ERR_INVALID_ARG;
     }
 
-    // `s` now points to the beginning of hostname or IP address.
+    // 現在、`s`はホスト名またはIPアドレスの先頭を指している
+    // ポート番号を取得する
     char *host = s;
     char *sep = strchr(s, ':');
     if (sep) {
@@ -77,6 +87,8 @@ static error_t resolve_url(const char *url, uint32_t *ip_addr, uint16_t *port,
         }
     }
 
+    // IPアドレスの場合は文字列から数値に変換する。
+    // ホスト名の場合はDNSに問い合わせる
     if (isdigit(*host)) {
         if (parse_ipaddr(host, ip_addr) != OK) {
             WARN("failed to parse an ip address: '%s'", host);
@@ -92,13 +104,17 @@ static error_t resolve_url(const char *url, uint32_t *ip_addr, uint16_t *port,
         *ip_addr = m.tcpip_dns_resolve_reply.addr;
     }
 
-    // `s` now points to the path next to the first slash.
+    // 現在、`s`は最初のスラッシュの次のパスを指している
 
     *path = s;
     free(s_orig);
     return OK;
 }
 
+/** @ingroup shell
+ * @brief httpコマンドの実体: HTTP経由で情報を取得する
+ * @param url URL
+*/
 void http_get(const char *url) {
     tcpip_server = ipc_lookup("tcpip");
 
