@@ -18,7 +18,7 @@ __noreturn void panic_after_hook(void);
 // ANSI エスケープシーケンス (SGR).
 #define SGR_ERR   "\e[1;91m"  // 赤色 + 太字
 #define SGR_WARN  "\e[1;33m"  // 黄色 + 太字
-#define SGR_INFO  "\e[0;96m"  // シアン (青緑色)
+#define SGR_INFO  "\e[1;32m"  // 緑 + 太字
 #define SGR_DEBUG "\e[1;95m"  // マゼンタ (紫色) + 太字
 #define SGR_RESET "\e[0m"     // 色をリセット
 
