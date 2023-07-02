@@ -243,6 +243,25 @@ struct tcpip_closed_fields {
     int sock;
 };
 
+struct rtc_epoch_fields {
+};
+struct rtc_epoch_reply_fields {
+    unsigned high;
+    unsigned low;
+};
+
+struct rtc_timeofday_fields {
+};
+struct rtc_timeofday_reply_fields {
+    unsigned year;
+    unsigned mon;
+    unsigned day;
+    unsigned wday;
+    unsigned hour;
+    unsigned min;
+    unsigned sec;
+};
+
 
 #define __DEFINE_MSG_TYPE(type, len) ((type) << 12 | (len))
 
@@ -309,6 +328,10 @@ struct tcpip_closed_fields {
 #define TCPIP_DNS_RESOLVE_REPLY_MSG __DEFINE_MSG_TYPE(60, sizeof(struct tcpip_dns_resolve_fields))
 #define TCPIP_DATA_MSG __DEFINE_MSG_TYPE(61, sizeof(struct tcpip_data_fields))
 #define TCPIP_CLOSED_MSG __DEFINE_MSG_TYPE(62, sizeof(struct tcpip_closed_fields))
+#define RTC_EPOCH_MSG __DEFINE_MSG_TYPE(63, sizeof(struct rtc_epoch_fields))
+#define RTC_EPOCH_REPLY_MSG __DEFINE_MSG_TYPE(64, sizeof(struct rtc_epoch_fields))
+#define RTC_TIMEOFDAY_MSG __DEFINE_MSG_TYPE(65, sizeof(struct rtc_timeofday_fields))
+#define RTC_TIMEOFDAY_REPLY_MSG __DEFINE_MSG_TYPE(66, sizeof(struct rtc_timeofday_fields))
 
 //
 //  各種マクロの定義
@@ -376,8 +399,12 @@ struct tcpip_closed_fields {
     struct tcpip_dns_resolve_reply_fields tcpip_dns_resolve_reply; \
     struct tcpip_data_fields tcpip_data; \
     struct tcpip_closed_fields tcpip_closed; \
+    struct rtc_epoch_fields rtc_epoch; \
+    struct rtc_epoch_reply_fields rtc_epoch_reply; \
+    struct rtc_timeofday_fields rtc_timeofday; \
+    struct rtc_timeofday_reply_fields rtc_timeofday_reply; \
 
-#define IPCSTUB_MSGID_MAX 62
+#define IPCSTUB_MSGID_MAX 66
 #define IPCSTUB_MSGID2STR \
     (const char *[]){ \
      \
@@ -477,6 +504,12 @@ struct tcpip_closed_fields {
         [61] = "tcpip_data", \
      \
         [62] = "tcpip_closed", \
+     \
+        [63] = "rtc_epoch", \
+        [64] = "rtc_epoch_reply", \
+     \
+        [65] = "rtc_timeofday", \
+        [66] = "rtc_timeofday_reply", \
      \
     }
 
@@ -728,5 +761,21 @@ struct tcpip_closed_fields {
     _Static_assert( \
         sizeof(struct tcpip_closed_fields) < 4096, \
         "'tcpip_closed' message is too large, should be less than 4096 bytes" \
+    ); \
+    _Static_assert( \
+        sizeof(struct rtc_epoch_fields) < 4096, \
+        "'rtc_epoch' message is too large, should be less than 4096 bytes" \
+    ); \
+    _Static_assert( \
+        sizeof(struct rtc_epoch_reply_fields) < 4096, \
+        "'rtc_epoch_reply' message is too large, should be less than 4096 bytes" \
+    ); \
+    _Static_assert( \
+        sizeof(struct rtc_timeofday_fields) < 4096, \
+        "'rtc_timeofday' message is too large, should be less than 4096 bytes" \
+    ); \
+    _Static_assert( \
+        sizeof(struct rtc_timeofday_reply_fields) < 4096, \
+        "'rtc_timeofday_reply' message is too large, should be less than 4096 bytes" \
     ); \
 

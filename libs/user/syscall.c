@@ -172,3 +172,11 @@ __noreturn void sys_shutdown(void) {
     arch_syscall(0, 0, 0, 0, 0, SYS_SHUTDOWN);
     UNREACHABLE();
 }
+
+/** @ingroup user
+ * @brief epochシステムコール: epoch時の首藤
+ * @return システム起動時間（ミリ秒）
+ */
+error_t sys_epoch(int32_t *high, uint32_t *low) {
+    return arch_syscall((uintptr_t) high, (uintptr_t) low, 0, 0, 0, SYS_EPOCH);
+}

@@ -7,10 +7,10 @@ ARCH ?= riscv32
 BUILD_DIR ?= build
 
 # ClangやLLD、llvm-objcopyなどのLLVMツールチェインのプレフィックス
-LLVM_PREFIX ?=
+LLVM_PREFIX ?= /usr/local/opt/llvm/bin/
 
 # 自動起動するサーバのリスト
-BOOT_SERVERS ?= fs tcpip shell virtio_blk virtio_net pong
+BOOT_SERVERS ?= fs tcpip shell virtio_blk virtio_net pong rtc
 
 # 起動時に自動実行するシェルコマンド (テストを自動化したいときに便利)
 #
@@ -143,6 +143,7 @@ QEMUFLAGS += -device virtio-blk-device,drive=drive0,bus=virtio-mmio-bus.0
 QEMUFLAGS += -device virtio-net-device,netdev=net0,bus=virtio-mmio-bus.1
 QEMUFLAGS += -object filter-dump,id=fiter0,netdev=net0,file=virtio-net.pcap
 QEMUFLAGS += -netdev user,id=net0
+QEMUFLAGS += -rtc clock=host
 
 hinaos_elf     := $(BUILD_DIR)/hinaos.elf
 boot_elf       := $(BUILD_DIR)/servers/vm.elf

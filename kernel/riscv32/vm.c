@@ -3,6 +3,7 @@
 #include "asm.h"
 #include "mp.h"
 #include "plic.h"
+#include "rtc.h"
 #include "uart.h"
 #include <kernel/arch.h>
 #include <kernel/memory.h>
@@ -253,5 +254,9 @@ void riscv32_vm_init(void) {
                         PAGE_READABLE | PAGE_WRITABLE));
     // ACLINT
     ASSERT_OK(map_pages(&kernel_vm, ACLINT_SSWI_PADDR, ACLINT_SSWI_PADDR,
+                        PAGE_SIZE, PAGE_READABLE | PAGE_WRITABLE));
+
+    // RTC
+    ASSERT_OK(map_pages(&kernel_vm, RTC_ADDR, RTC_ADDR,
                         PAGE_SIZE, PAGE_READABLE | PAGE_WRITABLE));
 }

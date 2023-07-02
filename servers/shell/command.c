@@ -4,6 +4,7 @@
 #include "http.h"
 #include <libs/common/print.h>
 #include <libs/common/string.h>
+#include <libs/common/datetime.h>
 #include <libs/user/ipc.h>
 #include <libs/user/syscall.h>
 
@@ -154,6 +155,27 @@ static void do_uptime(struct args *args) {
     printf("%d seconds\n", sys_uptime());
 }
 
+// dateコマンドの実行関数
+static void do_date(struct args *args) {
+    struct message m;
+    task_t rtc = ipc_lookup("rtc");
+    m.type = RTC_TIMEOFDAY_MSG;
+    ASSERT_OK(ipc_call(rtc, &m));
+    ASSERT(m.type == RTC_TIMEOFDAY_REPLY_MSG);
+    printf("%4u-%02u-%02u %02u:%02u:%02u UTC\n", m.rtc_timeofday_reply.year, m.rtc_timeofday_reply.mon, m.rtc_timeofday_reply.day, m.rtc_timeofday_reply.hour, m.rtc_timeofday_reply.min, m.rtc_timeofday_reply.sec);
+}
+
+// timeコマンドの実行関数
+static void do_time(struct args *args) {
+    struct message m;
+    task_t rtc = ipc_lookup("rtc");
+    m.type = RTC_EPOCH_MSG;
+    ASSERT_OK(ipc_call(rtc, &m));
+    ASSERT(m.type == RTC_EPOCH_REPLY_MSG);
+    int64_t time = ((int64_t)m.rtc_epoch_reply.high << 32) | m.rtc_epoch_reply.low;
+    printf("UTC: %lld\n", time);
+}
+
 // shutdownコマンドの実行関数
 __noreturn static void do_shutdown(struct args *args) {
     INFO("shutting down...");
@@ -179,6 +201,8 @@ static struct command commands[] = {
     {.name = "ping", .run = do_ping, .help = "Send a ping to pong server"},
     {.name = "uptime", .run = do_uptime, .help = "Show seconds since boot"},
     {.name = "shutdown", .run = do_shutdown, .help = "Shut down the system"},
+    {.name = "date", .run = do_date, .help = "Get local time"},
+    {.name = "time", .run = do_time, .help = "Get current time"},
     {.name = NULL},
 };
 

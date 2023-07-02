@@ -99,3 +99,5 @@ void arch_memcpy_to_user(__user void *dst, const void *src, size_t len);
 error_t arch_irq_enable(unsigned irq);
 error_t arch_irq_disable(unsigned irq);
 __noreturn void arch_shutdown(void);
+
+int64_t arch_rtc_epoch(void);
