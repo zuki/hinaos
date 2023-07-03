@@ -1,105 +1,77 @@
-/* From: https://github.com/gcc-mirror/gcc/blob/master/libgcc/config/riscv/div.S#L98 */
-/* Integer division routines for RISC-V.
-
-   Copyright (C) 2016-2023 Free Software Foundation, Inc.
-
-This file is part of GCC.
-
-GCC is free software; you can redistribute it and/or modify it under
-the terms of the GNU General Public License as published by the Free
-Software Foundation; either version 3, or (at your option) any later
-version.
-
-GCC is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
-for more details.
-
-Under Section 7 of GPL version 3, you are granted additional
-permissions described in the GCC Runtime Library Exception, version
-3.1, as published by the Free Software Foundation.
-
-You should have received a copy of the GNU General Public License and
-a copy of the GCC Runtime Library Exception along with this program;
-see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
-<http://www.gnu.org/licenses/>.  */
-
-#include "riscv-asm.h"
-
   .text
   .align 2
 
-FUNC_BEGIN (__divdi3)
-  bltz  a0, .L10
-  bltz  a1, .L11
-  /* Since the quotient is positive, fall into __udivdi3.  */
+.globl __divdi3; .type __divdi3,@function; __divdi3:
+  bltz a0, .L10
+  bltz a1, .L11
 
-FUNC_BEGIN (__udivdi3)
-  mv    a2, a1
-  mv    a1, a0
-  li    a0, -1
-  beqz  a2, .L5
-  li    a3, 1
-  bgeu  a2, a1, .L2
+
+.globl __udivdi3; .type __udivdi3,@function; __udivdi3:
+  mv a2, a1
+  mv a1, a0
+  li a0, -1
+  beqz a2, .L5
+  li a3, 1
+  bgeu a2, a1, .L2
 .L1:
-  blez  a2, .L2
-  slli  a2, a2, 1
-  slli  a3, a3, 1
-  bgtu  a1, a2, .L1
+  blez a2, .L2
+  slli a2, a2, 1
+  slli a3, a3, 1
+  bgtu a1, a2, .L1
 .L2:
-  li    a0, 0
+  li a0, 0
 .L3:
-  bltu  a1, a2, .L4
-  sub   a1, a1, a2
-  or    a0, a0, a3
+  bltu a1, a2, .L4
+  sub a1, a1, a2
+  or a0, a0, a3
 .L4:
-  srli  a3, a3, 1
-  srli  a2, a2, 1
-  bnez  a3, .L3
+  srli a3, a3, 1
+  srli a2, a2, 1
+  bnez a3, .L3
 .L5:
   ret
-FUNC_END (__udivdi3)
-HIDDEN_DEF (__udivdi3)
+.size __udivdi3,.-__udivdi3
+.globl __hidden___udivdi3; __hidden___udivdi3 = __udivdi3; .hidden __hidden___udivdi3
 
-FUNC_BEGIN (__umoddi3)
-  /* Call __udivdi3(a0, a1), then return the remainder, which is in a1.  */
-  move  t0, ra
-  jal   HIDDEN_JUMPTARGET(__udivdi3)
-  move  a0, a1
-  jr    t0
-FUNC_END (__umoddi3)
+.globl __umoddi3; .type __umoddi3,@function; __umoddi3:
 
-  /* Handle negative arguments to __divdi3.  */
+  move t0, ra
+  jal __hidden___udivdi3
+  move a0, a1
+  jr t0
+.size __umoddi3,.-__umoddi3
+
+
 .L10:
-  neg   a0, a0
-  /* Zero is handled as a negative so that the result will not be inverted.  */
-  bgtz  a1, .L12     /* Compute __udivdi3(-a0, a1), then negate the result.  */
+  neg a0, a0
 
-  neg   a1, a1
-  j     HIDDEN_JUMPTARGET(__udivdi3)     /* Compute __udivdi3(-a0, -a1).  */
-.L11:                /* Compute __udivdi3(a0, -a1), then negate the result.  */
-  neg   a1, a1
+  bgtz a1, .L12
+
+  neg a1, a1
+  j __hidden___udivdi3
+.L11:
+  neg a1, a1
 .L12:
-  move  t0, ra
-  jal   HIDDEN_JUMPTARGET(__udivdi3)
-  neg   a0, a0
-  jr    t0
-FUNC_END (__divdi3)
+  move t0, ra
+  jal __hidden___udivdi3
+  neg a0, a0
+  jr t0
+.size __divdi3,.-__divdi3
 
-FUNC_BEGIN (__moddi3)
-  move   t0, ra
-  bltz   a1, .L31
-  bltz   a0, .L32
+.globl __moddi3; .type __moddi3,@function; __moddi3:
+  move t0, ra
+  bltz a1, .L31
+  bltz a0, .L32
 .L30:
-  jal    HIDDEN_JUMPTARGET(__udivdi3)    /* The dividend is not negative.  */
-  move   a0, a1
-  jr     t0
+  jal __hidden___udivdi3
+  move a0, a1
+  jr t0
 .L31:
-  neg    a1, a1
-  bgez   a0, .L30
+  neg a1, a1
+  bgez a0, .L30
 .L32:
-  neg    a0, a0
-  jal    HIDDEN_JUMPTARGET(__udivdi3)    /* The dividend is hella negative.  */
-  neg    a0, a1
-  jr     t0
-FUNC_END (__moddi3)
+  neg a0, a0
+  jal __hidden___udivdi3
+  neg a0, a1
+  jr t0
+.size __moddi3,.-__moddi3

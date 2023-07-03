@@ -160,9 +160,10 @@ static void do_date(struct args *args) {
     struct message m;
     task_t rtc = ipc_lookup("rtc");
     m.type = RTC_TIMEOFDAY_MSG;
+    m.rtc_timeofday.jst = true;
     ASSERT_OK(ipc_call(rtc, &m));
     ASSERT(m.type == RTC_TIMEOFDAY_REPLY_MSG);
-    printf("%4u-%02u-%02u %02u:%02u:%02u UTC\n", m.rtc_timeofday_reply.year, m.rtc_timeofday_reply.mon, m.rtc_timeofday_reply.day, m.rtc_timeofday_reply.hour, m.rtc_timeofday_reply.min, m.rtc_timeofday_reply.sec);
+    printf("%4u-%02u-%02u %02u:%02u:%02u JST\n", m.rtc_timeofday_reply.year, m.rtc_timeofday_reply.mon, m.rtc_timeofday_reply.day, m.rtc_timeofday_reply.hour, m.rtc_timeofday_reply.min, m.rtc_timeofday_reply.sec);
 }
 
 // timeコマンドの実行関数
@@ -172,8 +173,8 @@ static void do_time(struct args *args) {
     m.type = RTC_EPOCH_MSG;
     ASSERT_OK(ipc_call(rtc, &m));
     ASSERT(m.type == RTC_EPOCH_REPLY_MSG);
-    int64_t time = ((int64_t)m.rtc_epoch_reply.high << 32) | m.rtc_epoch_reply.low;
-    printf("UTC: %lld\n", time);
+    int32_t time = m.rtc_epoch_reply.time;
+    printf("UTC: %d\n", time);
 }
 
 // shutdownコマンドの実行関数

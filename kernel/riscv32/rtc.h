@@ -2,7 +2,7 @@
 #pragma once
 
 // 1秒あたりのナノ秒数
-#define NSEC_PER_SEC	1000000000L
+//#define NSEC_PER_SEC	1000000000L
 // RTCのMMIOの物理アドレス
 #define RTC_ADDR    ((paddr_t) 0x101000)
 // RTCのMMIOのサイズ

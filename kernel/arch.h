@@ -100,4 +100,4 @@ error_t arch_irq_enable(unsigned irq);
 error_t arch_irq_disable(unsigned irq);
 __noreturn void arch_shutdown(void);
 
-int64_t arch_rtc_epoch(void);
+int32_t arch_rtc_epoch(void);

@@ -24,4 +24,4 @@ int sys_serial_read(const char *buf, int max_len);
 error_t sys_time(int milliseconds);
 int sys_uptime(void);
 __noreturn void sys_shutdown(void);
-error_t sys_epoch(int32_t *high, uint32_t *low);
+error_t sys_epoch(int32_t *time);

@@ -246,11 +246,11 @@ struct tcpip_closed_fields {
 struct rtc_epoch_fields {
 };
 struct rtc_epoch_reply_fields {
-    unsigned high;
-    unsigned low;
+    int time;
 };
 
 struct rtc_timeofday_fields {
+    bool jst;
 };
 struct rtc_timeofday_reply_fields {
     unsigned year;

@@ -323,12 +323,9 @@ __noreturn static int sys_shutdown(void) {
 }
 
 // 64ビットのEpochタイムを[32bit, 32bit]の配列で返す
-static error_t sys_epoch(__user int32_t *high, __user uint32_t *low) {
-    int64_t epoch = arch_rtc_epoch();
-    int32_t  epoch_high = (int32_t)(epoch >> 32);
-    uint32_t epoch_low  = (uint32_t)(epoch & 0xffffffff);
-    memcpy_to_user(high, &epoch_high, sizeof(int32_t));
-    memcpy_to_user(low, &epoch_low, sizeof(uint32_t));
+static error_t sys_epoch(__user int32_t *time) {
+    int32_t epoch = arch_rtc_epoch();
+    memcpy_to_user(time, &epoch, sizeof(int32_t));
     return OK;
 }
 
@@ -398,7 +395,7 @@ long handle_syscall(long a0, long a1, long a2, long a3, long a4, long n) {
             ret = sys_shutdown();
             break;
         case SYS_EPOCH:
-            ret = sys_epoch((__user int32_t *)a0, (__user uint32_t *)a1);
+            ret = sys_epoch((__user int32_t *)a0);
             break;
         default:
             ret = ERR_INVALID_ARG;

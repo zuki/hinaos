@@ -23,6 +23,8 @@ V ?=
 # make RELEASE=1: デバッグ用の機能の無効化とコンパイラの最適化の強化 (リリースビルド)
 RELEASE ?=
 
+QEMU_PREFIX ?= /Users/dspace/source/qemu/build/
+
 # make run CPUS=<CPU数>: QEMUの仮想CPU数を指定する
 QEMUFLAGS += -smp $(if $(CPUS),$(CPUS),1)
 
@@ -88,7 +90,8 @@ LD        := $(LLVM_PREFIX)ld.lld$(LLVM_SUFFIX)
 OBJCOPY   := $(LLVM_PREFIX)llvm-objcopy$(LLVM_SUFFIX)
 ADDR2LINE := $(LLVM_PREFIX)llvm-addr2line$(LLVM_SUFFIX)
 NM        := $(LLVM_PREFIX)llvm-nm$(LLVM_SUFFIX)
-GDB       ?= riscv64-unknown-elf-gdb
+#GDB       ?= riscv64-unknown-elf-gdb
+GDB	  ?= gdb
 PROGRESS  ?= printf "  \\033[1;96m%8s\\033[0m  \\033[1;m%s\\033[0m\\n"
 PYTHON3   ?= python3
 CP        ?= cp

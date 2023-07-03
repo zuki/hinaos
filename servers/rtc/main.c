@@ -10,7 +10,7 @@
 
 // Epoc秒数を日付に変換
 //   goldfish/drivers/rtc/rtc-lib.cを一部変更
-static void rtc_time_to_tm(int64_t time, struct tm *tm)
+static void rtc_time_to_tm(int32_t time, struct tm *tm)
 {
 	unsigned int month, year;
 	int days;
@@ -52,18 +52,18 @@ static void rtc_time_to_tm(int64_t time, struct tm *tm)
 }
 
 // Epocタイムの取得
-static void rtc_epoch(int32_t *high, uint32_t *low) {
-    ASSERT_OK(sys_epoch(high, low));
+static void rtc_epoch(int32_t *time) {
+    ASSERT_OK(sys_epoch(time));
     //INFO("high: 0x%0x, low: 0x%0x", *high, *low);
 }
 
 // 現在時刻の取得
-static void rtc_timeofday(struct tm *tm) {
-    int32_t high;
-    uint32_t low;
-    int64_t time;
-    rtc_epoch(&high, &low);
-    time = ((int64_t)high << 32) | low;
+static void rtc_timeofday(struct tm *tm, bool jst) {
+    int32_t time;
+    rtc_epoch(&time);
+    if (jst) {
+        time += 9 * 60 * 60;
+    }
     rtc_time_to_tm(time, tm);
 }
 
@@ -80,7 +80,7 @@ void main(void) {
         switch (m.type) {
             case RTC_TIMEOFDAY_MSG: {
                 struct tm now;
-                rtc_timeofday(&now);
+                rtc_timeofday(&now, m.rtc_timeofday.jst);
                 m.type = RTC_TIMEOFDAY_REPLY_MSG;
                 m.rtc_timeofday_reply.year = now.tm_year + 1900;
                 m.rtc_timeofday_reply.mon  = now.tm_mon + 1;
@@ -93,12 +93,10 @@ void main(void) {
                 break;
             }
             case RTC_EPOCH_MSG: {
-                int32_t high;
-                uint32_t low;
-                rtc_epoch(&high, &low);
+                int32_t time;
+                rtc_epoch(&time);
                 m.type = RTC_EPOCH_REPLY_MSG;
-                m.rtc_epoch_reply.high = high;
-                m.rtc_epoch_reply.low  = low;
+                m.rtc_epoch_reply.time = time;
                 ipc_reply(m.src, &m);
                 break;
             }

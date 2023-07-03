@@ -1,1 +1,1 @@
-objs-y += backtrace.o div.o
+objs-y += backtrace.o 
